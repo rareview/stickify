@@ -8,7 +8,6 @@ const options = { publicPath: '' };
 
 module.exports = {
   entry: {
-    script: './assets/js/script.js',
     editor: './assets/js/editor.js',
     styles: './assets/scss/styles.scss'
   },

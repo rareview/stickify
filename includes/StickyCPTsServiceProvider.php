@@ -1,19 +1,19 @@
 <?php
 /**
- * RV Plugin Starter service provider.
+ * Sticky CPTs service provider.
  *
  * @author Rareview <hello@rareview.com>
  *
- * @package RV Plugin Starter
+ * @package Sticky CPTs
  */
 
-namespace RvPluginStarter\Inc;
+namespace StickyCPTs\Inc;
 
 /**
  *
  * Plugin service provider.
  */
-class RvPluginStarterServiceProvider {
+class StickyCPTsServiceProvider {
 
     /**
      * The plugin features that should be bootstrapped.
@@ -22,6 +22,7 @@ class RvPluginStarterServiceProvider {
      */
     public static array $services = [
         Register::class,
+        Rest::class,
     ];
 
     /**

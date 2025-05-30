@@ -1,6 +1,6 @@
 {
-    "name": "rareview/rv-plugin-starter",
-    "description": "RV Plugin Starter WordPress plugin.",
+    "name": "rareview/sticky-cpts",
+    "description": "Sticky CPTs WordPress plugin.",
     "version": "1.0.0",
     "authors": [
         {
@@ -10,8 +10,8 @@
     ],
     "autoload": {
         "psr-4": {
-            "RvPluginStarter\\": "",
-            "RvPluginStarter\\Inc\\": "includes/"
+            "StickyCPTs\\": "",
+            "StickyCPTs\\Inc\\": "includes/"
         }
     }
 }

@@ -5,5 +5,15 @@
  *
  * @author Rareview <hello@rareview.com>
  *
- * @package RV Plugin Starter
+ * @package Sticky CPTs
  */
+
+import StickyCPTsSidebar from './components/StickyCPTsSidebar';
+
+const { registerPlugin } = wp.plugins;
+
+registerPlugin('rv-sticky-cpts-sidebar', {
+	render() {
+		return <StickyCPTsSidebar />;
+	},
+});

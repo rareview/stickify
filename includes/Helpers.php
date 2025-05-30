@@ -4,10 +4,12 @@
  *
  * @author Rareview <hello@rareview.com>
  *
- * @package RV Plugin Starter
+ * @package Sticky CPTs
  */
 
-namespace RvPluginStarter\Inc;
+namespace StickyCPTs\Inc;
+
+use StickyCPTs\Inc\Register;
 
 /**
  * Class Registry
@@ -39,7 +41,7 @@ class Helpers {
      */
     public static function asset_name( $file ) {
         if ( ! static::$manifest ) {
-            $directory        = WP_CONTENT_DIR . '/plugins/plugin-starter/dist';
+            $directory        = WP_CONTENT_DIR . '/plugins/sticky-cpts/dist';
             static::$manifest = json_decode( file_get_contents( "{$directory}/manifest.json" ), true );
         }
 
@@ -58,6 +60,40 @@ class Helpers {
      * @return string Asset url.
      */
     public static function asset_url( $file ) {
-        return \set_url_scheme( WP_CONTENT_URL . '/plugins/plugin-starter/dist/' . self::asset_name( $file ) );
+        return \set_url_scheme( WP_CONTENT_URL . '/plugins/sticky-cpts/dist/' . self::asset_name( $file ) );
+    }
+
+    /**
+	 * Get sticky post types.
+	 *
+	 * @return array
+	 */
+	public static function get_sticky_cpts_types() {
+		return apply_filters( Register::PREFIX . '_post_types', Register::POST_TYPES );
+	}
+
+    /**
+     * Get sticky posts by post type.
+     * 
+     * @param string $post_type Post type to get sticky posts for.
+     * 
+     * @return array
+     */
+    public static function get_sticky_posts_by_type( $post_type ) {
+        $args = [
+            'post_type'      => $post_type,
+            'meta_query'    => [
+                [
+                    'key'     => Register::STICKY_META_KEY,
+                    'value'   => true,
+                    'compare' => '=',
+                ],
+            ],
+        ];
+
+        $sticky_posts = get_posts( $args );
+        $sticky_post_ids = wp_list_pluck( $sticky_posts, 'ID' );
+
+        return $sticky_post_ids;
     }
 }
