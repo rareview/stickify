@@ -1,22 +1,29 @@
-# Wordpress Plugin Starter by Rareview
-This is a simple starter for building awesome WordPress plugins.
-
-It provides infrastructure for easily incorporating features we regularly 
-develop in our starter theme based projects, and converting them into WP plugins.
+# Wordpress Plugin Sticky CPTs by Rareview
+This is a WordPress plugin to give the ability to add a "sticky" feature to custom post types.
 
 ## Instructions
-This is a template repository, so you can use it by clicking the "Use this template" button above.<br>
-In your newly created repo, please follow these steps:
+Clone this repo into a local WordPress environment's `plugins` directory.
 
-- Rename the plugin main root folder to Your Plugin Name
-- Update plugin description in the main StickyCPTs.php file
-- Update plugin description in the package.json file 
-- Search and replace Sticky CPTs with Your Plugin Name
-- Search and replace sticky-posts with your-plugin-name
-- Search and replace StickyCPTs with YourPluginName
-- Rename the main StickyCPTs.php file to YourPluginName.php
-- Rename the StickyCPTsServiceProvider.php file to YourPluginNameServiceProvider.php
-- Run `composer install`
-- Run `npm install`
+Install necessary packages and dependencies
+- `composer install`
+- `npm install`
+
+Compile the plugins code for testing
 - Run `npm run watch` to watch for code changes and continuously compile the code
 - Run `npm run build` to build production code
+
+## Testing
+Activate the Sticky CPTs plugin.
+
+By default, the meta option this plugin provides will be available on Posts and Pages. To include the meta option on a custom post type, use the following filter.
+
+```
+function extend_sticky_post_types( $post_types ) {
+  $post_types[] = 'testimonial'; // Your CPT name this meta should be available on
+
+  return $post_types;
+}
+add_filter( 'sticky-cpts_post_types', 'extend_sticky_post_types' );
+```
+
+When viewing the archive of a post type that this applies to, posts with the meta option toggled on will appear at the start of an archive's list.
