@@ -16,6 +16,8 @@ use StickyCPTs\Inc\Register;
  */
 class Helpers {
 
+    const STICKY_META_KEY = '_sticky_cpt';
+
     /**
      * Plugin assets manifest.
      *
@@ -69,7 +71,7 @@ class Helpers {
 	 * @return array
 	 */
 	public static function get_sticky_cpts_types() {
-		return apply_filters( Register::PREFIX . '_post_types', Register::POST_TYPES );
+		return get_option( 'sticky_cpts_post_types', [] );
 	}
 
     /**

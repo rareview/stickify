@@ -12,7 +12,7 @@ namespace StickyCPTs\Inc;
 use StickyCPTs\Inc\Helpers;
 
 /**
- * Class Registry
+ * Class Register
  */
 class Register {
 
@@ -44,16 +44,17 @@ class Register {
     public function register_meta() {
         foreach ( Helpers::get_sticky_cpts_types() as $post_type ) {
             register_meta(
-                $post_type,
+                'post',
                 '_rv_sticky_cpts',
                 [
-                    'type'         => 'boolean',
-                    'single'       => true,
-                    'show_in_rest' => true,
-                    'auth_callback' => function () {
+                    'object_subtype'    => $post_type,
+                    'type'              => 'boolean',
+                    'single'            => true,
+                    'show_in_rest'      => true,
+                    'auth_callback'     => function () {
                         return current_user_can( 'edit_posts' );
                     },
-                    'default'      => false,
+                    'default'           => false,
                     'sanitize_callback' => function ( $value ) {
                         return filter_var( $value, FILTER_VALIDATE_BOOLEAN );
                     },
@@ -88,10 +89,12 @@ class Register {
     }
 
     public function prepend_sticky_posts( $posts, $query ) {
+        $sticky_post_types = Helpers::get_sticky_cpts_types();
+
         if (
             is_admin() ||
             ! $query->is_main_query() ||
-            ! $query->is_post_type_archive( Helpers::get_sticky_cpts_types() ) ||
+            ! in_array( $query->get( 'post_type' ), $sticky_post_types, true ) ||
             $query->get( 'paged' ) > 1
         ) {
             return $posts;

@@ -20,20 +20,11 @@ const MetaToggleControlInput = ({ metaKey, label, postMeta, setPostMeta }) => {
 			<PanelRow>
 				<ToggleControl
 					checked={postMeta[metaKey] ? Boolean(postMeta[metaKey]) : false}
-					onChange={(value) => {
-						if (value) {
-							// Set the meta value to true
-							setPostMeta({
-								[metaKey]: true,
-							});
-						} else {
-							// Delete the meta key entirely
-							const updatedMeta = { ...postMeta };
-							delete updatedMeta[metaKey];
-					
-							setPostMeta(updatedMeta);
-						}
-					}}
+					onChange={(value) =>
+						setPostMeta({
+							[metaKey]: value,
+						})
+					}
 					label={label}
 				/>
 			</PanelRow>

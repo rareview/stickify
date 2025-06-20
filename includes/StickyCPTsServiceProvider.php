@@ -23,6 +23,7 @@ class StickyCPTsServiceProvider {
     public static array $services = [
         Register::class,
         Rest::class,
+        Settings::class,
     ];
 
     /**
