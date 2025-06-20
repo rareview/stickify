@@ -3,7 +3,7 @@
  */
 const apiFetch = wp.apiFetch;
 const { compose } = wp.compose;
-const { withSelect, withDispatch } = wp.data;
+const { withSelect, withDispatch, useSelect } = wp.data;
 const { PluginDocumentSettingPanel } = wp.editPost;
 const { useEffect, useState } = wp.element;
 const { __ } = wp.i18n;
@@ -39,7 +39,20 @@ const StickyCPTsSidebar = ({ postType, postMeta, setPostMeta }) => {
 		fetchStickyCPTsPostTypes();
 	}, [isLoading]);
 
-	if (!isLoading && postTypes.length > 0 && postTypes.includes(postType)) {
+	const supportsCustomFields = useSelect(
+		(select) => {
+			const settings = select('core').getPostType(postType);
+			return settings.supports['custom-fields'] || false;
+		},
+		[]
+	);
+
+	if (
+		!isLoading &&
+		postTypes.length > 0 &&
+		postTypes.includes(postType) &&
+		supportsCustomFields
+	) {
 		return (
 			<PluginDocumentSettingPanel
 				title={__('Sticky CPTs Settings', 'sticky-cpts')}
@@ -58,7 +71,8 @@ const StickyCPTsSidebar = ({ postType, postMeta, setPostMeta }) => {
 	
 	if (
 		(!isLoading && postTypes.length === 0) ||
-		(!isLoading && postTypes.length > 0 && !postTypes.includes(postType))
+		(!isLoading && postTypes.length > 0 && !postTypes.includes(postType)) ||
+		!supportsCustomFields
 	) {
 		return null;
 	}
