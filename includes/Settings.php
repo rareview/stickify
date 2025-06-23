@@ -73,7 +73,7 @@ class Settings {
 
 	public function sticky_cpts_admin_menu() {
 		add_options_page(
-			__( 'Page title', 'sticky-cpts' ),
+			__( 'Sticky CPTs Settings', 'sticky-cpts' ),
 			__( 'Sticky CPTs', 'sticky-cpts' ),
 			'manage_options',
 			'sticky-cpts',

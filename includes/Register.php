@@ -37,6 +37,7 @@ class Register {
     public function register_editor_assets() {
         add_action( 'init', [ $this, 'register_meta' ] );
         add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
+        add_action( 'pre_get_posts', [ $this, 'maybe_remove_posts_from_query' ] );
         add_filter( 'the_posts', [ $this, 'prepend_sticky_posts' ], 10, 2 );
         add_filter( 'is_sticky', [ $this, 'evauluate_sticky_status' ], 10, 2 );
     }
@@ -87,6 +88,21 @@ class Register {
             $this->sticky_posts_to_prepend = $sticky_posts;
         }
     }
+
+    public function maybe_remove_posts_from_query( $query ) {
+        if ( ! $query->is_main_query() || is_admin() || ! in_array( $query->get( 'post_type' ), Helpers::get_sticky_cpts_types(), true ) ) {
+            return;
+        }
+
+        $sticky_ids = Helpers::get_sticky_posts_by_type( $query->get( 'post_type' ) );
+        
+        if ( empty( $sticky_ids ) ) {
+            return;
+        }
+
+        $query->set( 'post__not_in', $sticky_ids );
+    }
+        
 
     public function prepend_sticky_posts( $posts, $query ) {
         $sticky_post_types = Helpers::get_sticky_cpts_types();
