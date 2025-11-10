@@ -5,15 +5,15 @@
  *
  * @author Rareview <hello@rareview.com>
  *
- * @package Sticky CPTs
+ * @package StickyPostTypes
  */
 
-import StickyCPTsSidebar from './components/StickyCPTsSidebar';
+import StickyPostTypesSidebar from './components/StickyPostTypesSidebar';
 
 const { registerPlugin } = wp.plugins;
 
-registerPlugin('rv-sticky-cpts-sidebar', {
+registerPlugin('rv-sticky-post-types-sidebar', {
 	render() {
-		return <StickyCPTsSidebar />;
+		return <StickyPostTypesSidebar />;
 	},
 });

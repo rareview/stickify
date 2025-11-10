@@ -1,4 +1,4 @@
-# Wordpress Plugin Sticky CPTs by Rareview
+# Sticky Post Types by Rareview
 This is a WordPress plugin to give the ability to add a "sticky" feature to custom post types.
 
 ## Instructions
@@ -13,7 +13,7 @@ Compile the plugins code for testing
 - Run `npm run build` to build production code
 
 ## Testing
-Activate the Sticky CPTs plugin.
+Activate the Sticky Post Types plugin.
 
 By default, the meta option this plugin provides will be available on Posts and Pages. To include the meta option on a custom post type, use the following filter.
 

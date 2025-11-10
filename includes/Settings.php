@@ -4,52 +4,66 @@
  *
  * @author Rareview <hello@rareview.com>
  *
- * @package Sticky CPTs
+ * @package StickyPostTypes
  */
 
-namespace StickyCPTs\Inc;
+namespace StickyPostTypes\Inc;
 
-use StickyCPTs\Inc\Helpers;
+use StickyPostTypes\Inc\Helpers;
 
 /**
  * Class Settings
  */
 class Settings {
 
+	/**
+	 * Publically available post types.
+	 *
+	 * @var array $public_post_types
+	 */
 	protected $public_post_types = [];
 
-    /**
-     * Constructor.
-     */
-    public function __construct() {
-        $this->register_editor_assets();
-    }
+	/**
+	 * Constructor.
+	 */
+	public function __construct() {
+		$this->register_editor_assets();
+	}
 
-    /**
-     * Register editor assets.
-     *
-     * @return void
-     */
-    public function register_editor_assets() {
-		add_action( 'admin_init', [ $this, 'sticky_cpts_register_settings' ] );
-		add_action( 'admin_menu', [ $this, 'sticky_cpts_admin_menu' ] );
-    }
+	/**
+	 * Register editor assets.
+	 *
+	 * @return void
+	 */
+	public function register_editor_assets() {
+		add_action( 'admin_init', [ $this, 'sticky_post_types_register_settings' ] );
+		add_action( 'admin_menu', [ $this, 'sticky_post_types_admin_menu' ] );
+	}
 
-	public function sticky_cpts_register_settings() {
+	/**
+	 * Register the sticky post types settings.
+	 */
+	public function sticky_post_types_register_settings() {
 		register_setting(
-			'sticky_cpts_options_group',
-			'sticky_cpts_post_types',
+			'sticky_post_types_options_group',
+			'sticky_post_types_post_types',
 			[
 				'type'              => 'array',
-				'description'       => __( 'Array of post types to enable sticky functionality for.', 'sticky-cpts' ),
+				'description'       => __( 'Array of post types to enable sticky functionality for.', 'sticky-post-types' ),
 				'show_in_rest'      => true,
 				'default'           => [],
-				'sanitize_callback' => [ $this, 'sanitize_sticky_cpts_post_types' ],
+				'sanitize_callback' => [ $this, 'sanitize_sticky_post_types_post_types' ],
 			],
 		);
 	}
 
-	public function sanitize_sticky_cpts_post_types( $input ) {
+	/**
+	 * Sanitizes the list of post types selected for sticky functionality.
+	 *
+	 * @param mixed $input The raw option value submitted for the setting.
+	 * @return array The sanitized array of allowed post type slugs.
+	 */
+	public function sanitize_sticky_post_types_post_types( $input ) {
 		if ( ! is_array( $input ) ) {
 			return [];
 		}
@@ -71,46 +85,52 @@ class Settings {
 		);
 	}
 
-	public function sticky_cpts_admin_menu() {
+	/**
+	 * Add admin menu item.
+	 */
+	public function sticky_post_types_admin_menu() {
 		add_options_page(
-			__( 'Sticky CPTs Settings', 'sticky-cpts' ),
-			__( 'Sticky CPTs', 'sticky-cpts' ),
+			__( 'Sticky Post Types Settings', 'sticky-post-types' ),
+			__( 'Sticky Post Types', 'sticky-post-types' ),
 			'manage_options',
-			'sticky-cpts',
-			[ $this, 'sticky_cpts_options_page' ]
+			'sticky-post-types',
+			[ $this, 'sticky_post_types_options_page' ]
 		);
 	}
 
-	public function sticky_cpts_options_page() {
+	/**
+	 * Setup the options page.
+	 */
+	public function sticky_post_types_options_page() {
 		$public_post_types = get_post_types(
 			[
 				'public'   => true,
 				'_builtin' => false,
 			],
 		);
-		$sticky_post_types = Helpers::get_sticky_cpts_types();
+		$sticky_post_types = Helpers::get_sticky_post_types_types();
 		?>
 		<div class="wrap">
-			<h1><?php esc_html_e( 'Sticky Custom Post Types Settings', 'sticky-cpts' ); ?></h1>
+			<h1><?php esc_html_e( 'Sticky Custom Post Types Settings', 'sticky-post-types' ); ?></h1>
 			<form method="post" action="options.php">
 				<?php
-				settings_fields( 'sticky_cpts_options_group' );
-				do_settings_sections( 'sticky_cpts_options_group' );
+				settings_fields( 'sticky_post_types_options_group' );
+				do_settings_sections( 'sticky_post_types_options_group' );
 				?>
 				<table class="form-table">
 					<tr valign="top">
-						<th scope="row"><?php esc_html_e( 'Sticky Post Types', 'sticky-cpts' ); ?></th>
+						<th scope="row"><?php esc_html_e( 'Sticky Post Types', 'sticky-post-types' ); ?></th>
 						<td>
 							<?php foreach ( $public_post_types as $post_type ) : ?>
 								<label>
-									<input type="checkbox" name="sticky_cpts_post_types[]" value="<?php echo esc_attr( $post_type ); ?>" <?php checked( in_array( $post_type, $sticky_post_types, true ) ); ?> />
+									<input type="checkbox" name="sticky_post_types_post_types[]" value="<?php echo esc_attr( $post_type ); ?>" <?php checked( in_array( $post_type, $sticky_post_types, true ) ); ?> />
 									<?php echo esc_html( ucfirst( $post_type ) ); ?>
 								</label><br>
 							<?php endforeach; ?>
 						</td>
 					</tr>
 				</table>
-				<?php submit_button( __( 'Save Changes', 'sticky-cpts' ) ); ?>
+				<?php submit_button( __( 'Save Changes', 'sticky-post-types' ) ); ?>
 			</form>
 		</div>
 		<?php

@@ -1,0 +1,10 @@
+{
+  "patterns": [
+	"**/*.json",
+	"!node_modules",
+	"!vendor",
+	"!*-lock.json",
+	"!dist"
+  ],
+  "log-files": true
+}

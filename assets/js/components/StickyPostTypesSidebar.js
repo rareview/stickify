@@ -7,14 +7,14 @@ const { withSelect, withDispatch, useSelect } = wp.data;
 const { PluginDocumentSettingPanel } = wp.editPost;
 const { useEffect, useState } = wp.element;
 const { __ } = wp.i18n;
-const STICKY_POST_META_KEY = '_rv_sticky_cpts';
+const STICKY_POST_META_KEY = '_rv_sticky_post_types';
 
 /**
  * Internal dependencies
  */
 import MetaToggleControlInput from './MetaToggleControlInput';
 
-const StickyCPTsSidebar = ({ postType, postMeta, setPostMeta }) => {
+const StickyPostTypesSidebar = ({ postType, postMeta, setPostMeta }) => {
 	const [isLoading, setIsLoading] = useState(true);
 	const [postTypes, setPostTypes] = useState([]);
 
@@ -22,12 +22,12 @@ const StickyCPTsSidebar = ({ postType, postMeta, setPostMeta }) => {
 	 * Fetch events from the REST API.
 	 */
 	useEffect(() => {
-		const fetchStickyCPTsPostTypes = async () => {
+		const fetchStickyPostTypes = async () => {
 			try {
 				const response = await apiFetch({
-					path: '/sticky-cpts/v1/post-types',
+					path: '/sticky-post-types/v1/post-types',
 				});
-				
+
 				setPostTypes(response);
 			} catch (error) {
 				setPostTypes([]);
@@ -36,16 +36,13 @@ const StickyCPTsSidebar = ({ postType, postMeta, setPostMeta }) => {
 			}
 		};
 
-		fetchStickyCPTsPostTypes();
+		fetchStickyPostTypes();
 	}, [isLoading]);
 
-	const supportsCustomFields = useSelect(
-		(select) => {
-			const settings = select('core').getPostType(postType);
-			return settings.supports['custom-fields'] || false;
-		},
-		[]
-	);
+	const supportsCustomFields = useSelect((select) => {
+		const settings = select('core').getPostType(postType);
+		return settings.supports['custom-fields'] || false;
+	}, []);
 
 	if (
 		!isLoading &&
@@ -55,20 +52,20 @@ const StickyCPTsSidebar = ({ postType, postMeta, setPostMeta }) => {
 	) {
 		return (
 			<PluginDocumentSettingPanel
-				title={__('Sticky CPTs Settings', 'sticky-cpts')}
+				title={__('Sticky Post Types Settings', 'sticky-post-types')}
 				icon="edit"
 				initialOpen="true"
 			>
 				<MetaToggleControlInput
 					metaKey={STICKY_POST_META_KEY}
-					label={__('Move this post to the front of the archive?', 'sticky-cpts')}
+					label={__('Move this post to the front of the archive?', 'sticky-post-types')}
 					postMeta={postMeta}
 					setPostMeta={setPostMeta}
 				/>
 			</PluginDocumentSettingPanel>
 		);
 	}
-	
+
 	if (
 		(!isLoading && postTypes.length === 0) ||
 		(!isLoading && postTypes.length > 0 && !postTypes.includes(postType)) ||
@@ -92,4 +89,4 @@ export default compose([
 			},
 		};
 	}),
-])(StickyCPTsSidebar);
+])(StickyPostTypesSidebar);
