@@ -55,7 +55,7 @@
     "@wordpress/babel-preset-default": "^4.8.0",
     "@wordpress/eslint-plugin": "^22.20.0",
     "@wordpress/stylelint-config": "^23.26.0",
-    "babel-loader": "^9.1.3",
+    "babel-loader": "^10.0.0",
     "commit-and-tag-version": "^12.6.0",
     "css-loader": "^6.10.0",
     "eslint": "^8.57.1",
