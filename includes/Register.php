@@ -37,6 +37,7 @@ class Register {
 	public function register_editor_assets() {
 		add_action( 'init', [ $this, 'register_meta' ] );
 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
+		add_filter( 'query_loop_block_query_vars', [ $this, 'enable_sticky_for_query_loop_block' ], 10, 2 );
 		add_action( 'updated_post_meta', [ $this, 'maybe_clear_sticky_cache_on_meta_change' ], 10, 4 );
 		add_action( 'added_post_meta', [ $this, 'maybe_clear_sticky_cache_on_meta_change' ], 10, 4 );
 		add_action( 'deleted_post_meta', [ $this, 'maybe_clear_sticky_cache_on_meta_change' ], 10, 4 );
@@ -60,7 +61,14 @@ class Register {
 			return null;
 		}
 
-		if ( is_admin() || ! $query->is_main_query() ) {
+		if ( $query->get( 'ignore_sticky_posts' ) ) {
+			return null;
+		}
+
+		$is_rest_request = ( function_exists( 'wp_is_serving_rest_request' ) && wp_is_serving_rest_request() ) || ( defined( 'REST_REQUEST' ) && REST_REQUEST );
+		$is_query_loop   = (bool) $query->get( 'sticky_post_types_query_loop', false );
+
+		if ( ! $is_rest_request && ! $is_query_loop && ( is_admin() || ! $query->is_main_query() ) ) {
 			return null;
 		}
 
@@ -77,12 +85,29 @@ class Register {
 			array_intersect( $post_types, $sticky_post_types )
 		);
 
-		// Only support single post type queries (for now)
+		// Only support single post type queries (for now).
 		if ( 1 !== count( $matching_types ) ) {
 			return null;
 		}
 
 		return $matching_types[0];
+	}
+
+	/**
+	 * Enable sticky post type handling for Query Loop block queries.
+	 *
+	 * @param array $query Query vars for the block query.
+	 * @param mixed $block Parsed block context.
+	 *
+	 * @return array
+	 */
+	public function enable_sticky_for_query_loop_block( array $query, $block ): array {
+		unset( $block );
+
+		$query['sticky_post_types']            = true;
+		$query['sticky_post_types_query_loop'] = true;
+
+		return $query;
 	}
 
 	/**
@@ -241,7 +266,14 @@ class Register {
 			]
 		);
 
-		return array_merge( $sticky_posts, $posts );
+		$merged_posts = array_merge( $sticky_posts, $posts );
+
+		// Keep the original query page size after prepending sticky posts.
+		if ( count( $posts ) > 0 ) {
+			return array_slice( $merged_posts, 0, count( $posts ) );
+		}
+
+		return $merged_posts;
 	}
 
 	/**

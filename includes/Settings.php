@@ -60,6 +60,8 @@ class Settings {
 			true
 		);
 
+		wp_enqueue_style( 'wp-components' );
+
 		wp_localize_script(
 			Register::PREFIX . '-admin-settings-script',
 			'stickyPostTypesAdmin',
