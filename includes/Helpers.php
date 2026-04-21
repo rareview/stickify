@@ -16,7 +16,6 @@ use StickyPostTypes\Inc\Register;
  */
 class Helpers {
 
-	const STICKY_META_KEY  = '_sticky_post_type';
 	const STICKY_CACHE_KEY = 'sticky_post_type';
 
 	/**
@@ -44,8 +43,25 @@ class Helpers {
 	 */
 	public static function asset_name( $file ) {
 		if ( ! static::$manifest ) {
-			$directory        = WP_CONTENT_DIR . '/plugins/sticky-post-types/dist';
-			static::$manifest = json_decode( wp_remote_get( "{$directory}/manifest.json" ), true );
+			$manifest_file = dirname( __DIR__ ) . '/dist/manifest.json';
+
+			if ( ! file_exists( $manifest_file ) || ! is_readable( $manifest_file ) ) {
+				static::$manifest = [];
+			} else {
+				if ( function_exists( 'wp_json_file_decode' ) ) {
+					$decoded_manifest = wp_json_file_decode( $manifest_file, [ 'associative' => true ] );
+					static::$manifest = is_array( $decoded_manifest ) ? $decoded_manifest : [];
+				} else {
+					$manifest_contents = file_get_contents( $manifest_file );
+
+					if ( false === $manifest_contents ) {
+						static::$manifest = [];
+					} else {
+						$decoded_manifest = json_decode( $manifest_contents, true );
+						static::$manifest = is_array( $decoded_manifest ) ? $decoded_manifest : [];
+					}
+				}
+			}
 		}
 
 		if ( ! isset( static::$manifest[ $file ] ) ) {
@@ -63,7 +79,7 @@ class Helpers {
 	 * @return string Asset url.
 	 */
 	public static function asset_url( $file ) {
-		return \set_url_scheme( WP_CONTENT_URL . '/plugins/sticky-post-types/dist/' . self::asset_name( $file ) );
+		return plugins_url( 'dist/' . self::asset_name( $file ), dirname( __DIR__ ) . '/sticky-post-types.php' );
 	}
 
 	/**
@@ -71,8 +87,8 @@ class Helpers {
 	 *
 	 * @return array
 	 */
-	public static function get_sticky_post_types_types() {
-		return get_option( 'sticky_post_types_post_types', [] );
+	public static function get_sticky_post_types() {
+		return (array) get_option( 'sticky_post_types_post_types', [] );
 	}
 
 	/**
@@ -91,8 +107,14 @@ class Helpers {
 
 		if ( false === $sticky_post_ids ) {
 			$args = [
-				'post_type'  => $post_type,
-				'meta_query' => [ // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+				'post_type'              => $post_type,
+				'post_status'            => 'publish',
+				'posts_per_page'         => -1,
+				'fields'                 => 'ids',
+				'no_found_rows'          => true,
+				'update_post_meta_cache' => false,
+				'update_post_term_cache' => false,
+				'meta_query'             => [ // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 					[
 						'key'     => Register::STICKY_META_KEY,
 						'value'   => true,
@@ -101,12 +123,26 @@ class Helpers {
 				],
 			];
 
-			$sticky_posts    = get_posts( $args );
-			$sticky_post_ids = wp_list_pluck( $sticky_posts, 'ID' );
+			$sticky_post_ids = get_posts( $args );
 
 			set_transient( self::STICKY_CACHE_KEY . '-' . $post_type, $sticky_post_ids, DAY_IN_SECONDS );
 		}
 
-		return $sticky_post_ids;
+		return array_map( 'absint', (array) $sticky_post_ids );
+	}
+
+	/**
+	 * Delete sticky posts cache for a post type.
+	 *
+	 * @param string $post_type Post type to clear cache for.
+	 *
+	 * @return void
+	 */
+	public static function delete_sticky_posts_cache_by_type( string $post_type ): void {
+		if ( empty( $post_type ) ) {
+			return;
+		}
+
+		delete_transient( self::STICKY_CACHE_KEY . '-' . $post_type );
 	}
 }

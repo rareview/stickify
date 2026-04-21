@@ -11,7 +11,8 @@ module.exports = (env, argv) => {
 	return {
 		mode: isProd ? 'production' : 'development',
 		entry: {
-			editor: './assets/js/editor.js'
+			editor: './assets/js/editor.js',
+			'admin-settings': './assets/js/admin-settings.js',
 		},
 		output: {
 			filename: '[name].min.js',

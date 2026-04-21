@@ -45,7 +45,7 @@ class Rest {
 			[
 				'methods'             => 'GET',
 				'callback'            => function () {
-					$post_types = Helpers::get_sticky_post_types_types();
+					$post_types = Helpers::get_sticky_post_types();
 
 					return $post_types;
 				},

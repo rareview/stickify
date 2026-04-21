@@ -37,28 +37,69 @@ class Register {
 	public function register_editor_assets() {
 		add_action( 'init', [ $this, 'register_meta' ] );
 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
+		add_action( 'updated_post_meta', [ $this, 'maybe_clear_sticky_cache_on_meta_change' ], 10, 4 );
+		add_action( 'added_post_meta', [ $this, 'maybe_clear_sticky_cache_on_meta_change' ], 10, 4 );
+		add_action( 'deleted_post_meta', [ $this, 'maybe_clear_sticky_cache_on_meta_change' ], 10, 4 );
+		add_action( 'save_post', [ $this, 'maybe_clear_sticky_cache_on_save' ], 10, 2 );
+		add_action( 'before_delete_post', [ $this, 'maybe_clear_sticky_cache_on_delete' ] );
 		add_action( 'pre_get_posts', [ $this, 'maybe_remove_posts_from_query' ] );
+
 		add_filter( 'the_posts', [ $this, 'maybe_prepend_sticky_posts' ], 10, 2 );
-		add_filter( 'is_sticky', [ $this, 'evauluate_sticky_status' ] );
+		add_filter( 'is_sticky', [ $this, 'evaluate_sticky_status' ] );
+	}
+
+	/**
+	 * Get the sticky-enabled post type for the current query.
+	 *
+	 * @param WP_Query $query The current query.
+	 *
+	 * @return string|null Supported post type or null.
+	 */
+	private static function get_sticky_query_post_type( WP_Query $query ): ?string {
+		if ( false === $query->get( 'sticky_post_types', true ) ) {
+			return null;
+		}
+
+		if ( is_admin() || ! $query->is_main_query() ) {
+			return null;
+		}
+
+		$post_types = $query->get( 'post_type' );
+
+		if ( empty( $post_types ) ) {
+			return null;
+		}
+
+		$post_types        = array_values( (array) $post_types );
+		$sticky_post_types = Helpers::get_sticky_post_types();
+
+		$matching_types = array_values(
+			array_intersect( $post_types, $sticky_post_types )
+		);
+
+		// Only support single post type queries (for now)
+		if ( 1 !== count( $matching_types ) ) {
+			return null;
+		}
+
+		return $matching_types[0];
 	}
 
 	/**
 	 * Register the sticky post meta.
 	 */
 	public function register_meta() {
-		foreach ( Helpers::get_sticky_post_types_types() as $post_type ) {
-			register_meta(
-				'post',
-				'_rv_sticky_post_types',
+		foreach ( Helpers::get_sticky_post_types() as $post_type ) {
+			register_post_meta(
+				$post_type,
+				self::STICKY_META_KEY,
 				[
-					'object_subtype'    => $post_type,
 					'type'              => 'boolean',
 					'single'            => true,
 					'show_in_rest'      => true,
 					'auth_callback'     => function () {
 						return current_user_can( 'edit_posts' );
 					},
-					'default'           => false,
 					'sanitize_callback' => function ( $value ) {
 						return filter_var( $value, FILTER_VALIDATE_BOOLEAN );
 					},
@@ -77,32 +118,96 @@ class Register {
 	}
 
 	/**
+	 * Maybe clear sticky cache when sticky meta changes.
+	 *
+	 * @param int    $meta_id    Meta ID.
+	 * @param int    $post_id    Post ID.
+	 * @param string $meta_key   Meta key.
+	 * @param mixed  $meta_value Meta value.
+	 *
+	 * @return void
+	 */
+	public function maybe_clear_sticky_cache_on_meta_change( $meta_id, $post_id, $meta_key, $meta_value ): void {
+		if ( Register::STICKY_META_KEY !== $meta_key ) {
+			return;
+		}
+
+		$post_type = get_post_type( $post_id );
+
+		if ( ! $post_type ) {
+			return;
+		}
+
+		Helpers::delete_sticky_posts_cache_by_type( $post_type );
+	}
+
+	/**
+	 * Maybe clear sticky cache when a post is saved.
+	 *
+	 * @param int     $post_id Post ID.
+	 * @param WP_Post $post    Post object.
+	 *
+	 * @return void
+	 */
+	public function maybe_clear_sticky_cache_on_save( $post_id, $post ): void {
+		if ( wp_is_post_revision( $post_id ) ) {
+			return;
+		}
+
+		if ( empty( $post->post_type ) ) {
+			return;
+		}
+
+		Helpers::delete_sticky_posts_cache_by_type( $post->post_type );
+	}
+
+	/**
+	 * Maybe clear sticky cache when a post is deleted.
+	 *
+	 * @param int $post_id Post ID.
+	 *
+	 * @return void
+	 */
+	public function maybe_clear_sticky_cache_on_delete( $post_id ): void {
+		$post_type = get_post_type( $post_id );
+
+		if ( empty( $post_type ) ) {
+			return;
+		}
+
+		Helpers::delete_sticky_posts_cache_by_type( $post_type );
+	}
+
+	/**
 	 * Conditionally remove sticky posts from the query.
 	 *
 	 * @param WP_Query $query The current query.
 	 */
 	public function maybe_remove_posts_from_query( $query ) {
-		$sticky_post_types = Helpers::get_sticky_post_types_types();
+		$post_type = self::get_sticky_query_post_type( $query );
 
-		if (
-			is_admin() ||
-			! $query->is_main_query() ||
-			! in_array( $query->get( 'post_type' ), $sticky_post_types, true )
-		) {
+		if ( ! $post_type ) {
 			return;
 		}
 
-		$sticky_ids = Helpers::get_sticky_posts_by_type( $query->get( 'post_type' ) );
+		$sticky_ids = Helpers::get_sticky_posts_by_type( $post_type );
 
 		if ( empty( $sticky_ids ) ) {
 			return;
 		}
 
-		$query->set( 'post__not_in', $sticky_ids );
+		$post__not_in = $query->get( 'post__not_in', [] );
+		$post__not_in = array_map( 'absint', (array) $post__not_in );
+		$sticky_ids   = array_map( 'absint', $sticky_ids );
+
+		$query->set(
+			'post__not_in',
+			array_values( array_unique( array_merge( $post__not_in, $sticky_ids ) ) )
+		);
 	}
 
 	/**
-	 * Coditionally add sticky posts to the front of the query.
+	 * Conditionally add sticky posts to the front of the query.
 	 *
 	 * @param WP_Post  $posts Array of post objects.
 	 * @param WP_Query $query The current query.
@@ -110,18 +215,17 @@ class Register {
 	 * @return WP_Post|array The original or merged posts array.
 	 */
 	public function maybe_prepend_sticky_posts( $posts, $query ) {
-		$sticky_post_types = Helpers::get_sticky_post_types_types();
+		$post_type = self::get_sticky_query_post_type( $query );
 
-		if (
-			is_admin() ||
-			! $query->is_main_query() ||
-			! in_array( $query->get( 'post_type' ), $sticky_post_types, true ) ||
-			$query->get( 'paged' ) > 1
-		) {
+		if ( ! $post_type ) {
 			return $posts;
 		}
 
-		$sticky_ids = Helpers::get_sticky_posts_by_type( $query->get( 'post_type' ) );
+		if ( $query->get( 'paged' ) > 1 ) {
+			return $posts;
+		}
+
+		$sticky_ids = Helpers::get_sticky_posts_by_type( $post_type );
 
 		if ( empty( $sticky_ids ) ) {
 			return $posts;
@@ -130,7 +234,7 @@ class Register {
 		$sticky_posts = get_posts(
 			[
 				'post__in'         => $sticky_ids,
-				'post_type'        => $query->get( 'post_type' ),
+				'post_type'        => $post_type,
 				'orderby'          => 'post__in',
 				'posts_per_page'   => count( $sticky_ids ),
 				'suppress_filters' => false, // phpcs:ignore
@@ -148,14 +252,14 @@ class Register {
 	 *
 	 * @return bool Whether the current post is sticky.
 	 */
-	public function evauluate_sticky_status( int $post_id ): bool {
+	public function evaluate_sticky_status( int $post_id ): bool {
 		$post_id = absint( $post_id );
 
 		if ( ! $post_id ) {
 			$post_id = get_the_ID();
 		}
 
-		$sticky_post_types = Helpers::get_sticky_post_types_types();
+		$sticky_post_types = Helpers::get_sticky_post_types();
 		$post_type         = get_post_type( $post_id );
 
 		if ( ! in_array( $post_type, $sticky_post_types, true ) ) {
