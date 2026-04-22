@@ -38,6 +38,12 @@ class Settings {
 			10,
 			2
 		);
+		add_action(
+			'update_option_sticky_post_types_cache_length',
+			[ $this, 'clear_all_sticky_post_type_caches' ],
+			10,
+			2
+		);
 	}
 
 	/**
@@ -93,6 +99,24 @@ class Settings {
 				'sanitize_callback' => [ $this, 'sanitize_sticky_post_types_post_types' ],
 			],
 		);
+
+		register_setting(
+			'sticky_post_types_options_group',
+			'sticky_post_types_cache_length',
+			[
+				'type'              => 'integer',
+				'description'       => __( 'Sticky posts cache length in minutes.', 'sticky-post-types' ),
+				'show_in_rest'      => [
+					'schema' => [
+						'type'    => 'integer',
+						'default' => 15,
+						'minimum' => 1,
+					],
+				],
+				'default'           => 15,
+				'sanitize_callback' => [ $this, 'sanitize_sticky_post_types_cache_length' ],
+			]
+		);
 	}
 
 	/**
@@ -116,6 +140,17 @@ class Settings {
 				}
 			)
 		);
+	}
+
+	/**
+	 * Sanitize cache length setting.
+	 *
+	 * @param mixed $input Raw cache length value.
+	 *
+	 * @return int
+	 */
+	public function sanitize_sticky_post_types_cache_length( $input ) {
+		return max( 1, absint( $input ) ?: 15 );
 	}
 
 	/**
@@ -154,6 +189,7 @@ class Settings {
 	protected function render_settings_form() {
 		$public_post_types = $this->get_public_custom_post_types();
 		$sticky_post_types = Helpers::get_sticky_post_types();
+		$cache_length      = Helpers::get_sticky_cache_length();
 		?>
 		<form method="post" action="options.php">
 			<?php
@@ -170,6 +206,21 @@ class Settings {
 								<?php echo esc_html( $label ); ?>
 							</label><br>
 						<?php endforeach; ?>
+					</td>
+				</tr>
+				<tr valign="top">
+					<th scope="row">
+						<label for="sticky-post-types-cache-length"><?php esc_html_e( 'Cache Length', 'sticky-post-types' ); ?></label>
+					</th>
+					<td>
+						<input
+							id="sticky-post-types-cache-length"
+							type="number"
+							min="1"
+							name="sticky_post_types_cache_length"
+							value="<?php echo esc_attr( $cache_length ); ?>"
+						/>
+						<p class="description"><?php esc_html_e( 'How long, in minutes, sticky query results should be cached.', 'sticky-post-types' ); ?></p>
 					</td>
 				</tr>
 			</table>
@@ -216,6 +267,22 @@ class Settings {
 		$post_types = array_unique( array_merge( $old_value, $new_value ) );
 
 		foreach ( $post_types as $post_type ) {
+			Helpers::delete_sticky_posts_cache_by_type( $post_type );
+		}
+	}
+
+	/**
+	 * Clear all sticky post type caches when cache length changes.
+	 *
+	 * @param mixed $old_value Previous value.
+	 * @param mixed $new_value New value.
+	 *
+	 * @return void
+	 */
+	public function clear_all_sticky_post_type_caches( $old_value, $new_value ): void {
+		unset( $old_value, $new_value );
+
+		foreach ( Helpers::get_sticky_post_types() as $post_type ) {
 			Helpers::delete_sticky_posts_cache_by_type( $post_type );
 		}
 	}

@@ -92,6 +92,17 @@ class Helpers {
 	}
 
 	/**
+	 * Get sticky cache length in minutes.
+	 *
+	 * @return int
+	 */
+	public static function get_sticky_cache_length(): int {
+		$cache_length = absint( get_option( 'sticky_post_types_cache_length', 15 ) );
+
+		return max( 1, $cache_length );
+	}
+
+	/**
 	 * Get sticky posts by post type.
 	 *
 	 * @param string $post_type Post type to get sticky posts for.
@@ -177,8 +188,7 @@ class Helpers {
 
 			$sticky_post_ids = get_posts( $args );
 
-			// TODO: Add setting for cache duration.
-			set_transient( self::STICKY_CACHE_KEY . '-' . $post_type, $sticky_post_ids, MINUTE_IN_SECONDS * 15 );
+			set_transient( self::STICKY_CACHE_KEY . '-' . $post_type, $sticky_post_ids, MINUTE_IN_SECONDS * self::get_sticky_cache_length() );
 		}
 
 		return array_map( 'absint', (array) $sticky_post_ids );
