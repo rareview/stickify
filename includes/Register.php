@@ -49,6 +49,7 @@ class Register {
 
 		add_filter( 'the_posts', [ $this, 'maybe_prepend_sticky_posts' ], 10, 2 );
 		add_filter( 'is_sticky', [ $this, 'evaluate_sticky_status' ] );
+		add_filter( 'display_post_states', [ $this, 'maybe_add_sticky_post_state_labels' ], 10, 2 );
 	}
 
 	/**
@@ -315,6 +316,63 @@ class Register {
 	}
 
 	/**
+	 * Get sticky window status for a post.
+	 *
+	 * @param int $sticky_start Sticky start timestamp.
+	 * @param int $sticky_until Sticky until timestamp.
+	 *
+	 * @return string One of active, scheduled, or expired.
+	 */
+	private static function get_sticky_window_status( int $sticky_start, int $sticky_until ): string {
+		$current_time = time();
+
+		if ( $sticky_start > 0 && $sticky_start > $current_time ) {
+			return 'scheduled';
+		}
+
+		if ( $sticky_until > 0 && $sticky_until <= $current_time ) {
+			return 'expired';
+		}
+
+		return 'active';
+	}
+
+	/**
+	 * Add sticky schedule state labels to admin post list rows.
+	 *
+	 * @param array   $post_states Existing post state labels.
+	 * @param WP_Post $post        Current post object.
+	 *
+	 * @return array
+	 */
+	public function maybe_add_sticky_post_state_labels( array $post_states, WP_Post $post ): array {
+		$sticky_post_types = Helpers::get_sticky_post_types();
+
+		if ( ! in_array( $post->post_type, $sticky_post_types, true ) ) {
+			return $post_states;
+		}
+
+		$is_sticky = (bool) get_post_meta( $post->ID, self::STICKY_META_KEY, true );
+
+		if ( ! $is_sticky ) {
+			return $post_states;
+		}
+
+		$sticky_start = absint( get_post_meta( $post->ID, self::STICKY_START_META_KEY, true ) );
+		$sticky_until = absint( get_post_meta( $post->ID, self::STICKY_UNTIL_META_KEY, true ) );
+
+		if ( $sticky_start > 0 && 'scheduled' === self::get_sticky_window_status( $sticky_start, $sticky_until ) ) {
+			$post_states['sticky-post-types-scheduled'] = __( 'Scheduled', 'sticky-post-types' );
+		}
+
+		if ( $sticky_until > 0 && 'expired' === self::get_sticky_window_status( $sticky_start, $sticky_until ) ) {
+			$post_states['sticky-post-types-expired'] = __( 'Expired', 'sticky-post-types' );
+		}
+
+		return $post_states;
+	}
+
+	/**
 	 * Determine if a post should be considered sticky, adds "- Sticky" flag in
 	 * the admin and resolves boolean for frontend templates.
 	 *
@@ -345,20 +403,6 @@ class Register {
 		$sticky_start = absint( get_post_meta( $post_id, self::STICKY_START_META_KEY, true ) );
 		$sticky_until = absint( get_post_meta( $post_id, self::STICKY_UNTIL_META_KEY, true ) );
 
-		if ( ! $sticky_until && ! $sticky_start ) {
-			return true;
-		}
-
-		$current_time = time();
-
-		if ( $sticky_start && ! $sticky_until ) {
-			return $sticky_start <= $current_time;
-		}
-
-		if ( ! $sticky_start && $sticky_until ) {
-			return $sticky_until > $current_time;
-		}
-
-		return $sticky_start <= $current_time && $sticky_until > $current_time;
+		return 'active' === self::get_sticky_window_status( $sticky_start, $sticky_until );
 	}
 }
