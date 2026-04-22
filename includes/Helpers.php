@@ -106,6 +106,8 @@ class Helpers {
 		$sticky_post_ids = get_transient( self::STICKY_CACHE_KEY . '-' . $post_type );
 
 		if ( false === $sticky_post_ids ) {
+			$current_time = time();
+
 			$args = [
 				'post_type'              => $post_type,
 				'post_status'            => 'publish',
@@ -115,17 +117,45 @@ class Helpers {
 				'update_post_meta_cache' => false,
 				'update_post_term_cache' => false,
 				'meta_query'             => [ // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+					'relation' => 'AND',
 					[
 						'key'     => Register::STICKY_META_KEY,
 						'value'   => true,
 						'compare' => '=',
+					],
+					[
+						'relation' => 'OR',
+						[
+							'key'     => Register::STICKY_START_META_KEY,
+							'compare' => 'NOT EXISTS',
+						],
+						[
+							'key'     => Register::STICKY_START_META_KEY,
+							'value'   => $current_time,
+							'compare' => '<=',
+							'type'    => 'NUMERIC',
+						],
+					],
+					[
+						'relation' => 'OR',
+						[
+							'key'     => Register::STICKY_UNTIL_META_KEY,
+							'compare' => 'NOT EXISTS',
+						],
+						[
+							'key'     => Register::STICKY_UNTIL_META_KEY,
+							'value'   => $current_time,
+							'compare' => '>',
+							'type'    => 'NUMERIC',
+						],
 					],
 				],
 			];
 
 			$sticky_post_ids = get_posts( $args );
 
-			set_transient( self::STICKY_CACHE_KEY . '-' . $post_type, $sticky_post_ids, DAY_IN_SECONDS );
+			// TODO: Add setting for cache duration.
+			set_transient( self::STICKY_CACHE_KEY . '-' . $post_type, $sticky_post_ids, MINUTE_IN_SECONDS * 15 );
 		}
 
 		return array_map( 'absint', (array) $sticky_post_ids );

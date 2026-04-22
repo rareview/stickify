@@ -7,12 +7,15 @@ const { withSelect, withDispatch, useSelect } = wp.data;
 const { PluginDocumentSettingPanel } = wp.editPost;
 const { useEffect, useState } = wp.element;
 const { __ } = wp.i18n;
-const STICKY_POST_META_KEY = '_rv_sticky_post_types';
+const STICKY_META_KEY = '_rv_sticky_post_types';
+const STICKY_UNTIL_META_KEY = '_rv_sticky_post_types_until';
+const STICKY_START_META_KEY = '_rv_sticky_post_types_start';
 
 /**
  * Internal dependencies
  */
 import MetaToggleControlInput from './MetaToggleControlInput';
+import MetaDateControlInput from './MetaDateControlInput';
 
 const StickyPostTypesSidebar = ({ postType, postMeta, setPostMeta }) => {
 	const [isLoading, setIsLoading] = useState(true);
@@ -57,8 +60,29 @@ const StickyPostTypesSidebar = ({ postType, postMeta, setPostMeta }) => {
 				initialOpen="true"
 			>
 				<MetaToggleControlInput
-					metaKey={STICKY_POST_META_KEY}
-					label={__('Move this post to the front of the archive?', 'sticky-post-types')}
+					metaKey={STICKY_META_KEY}
+					label={__(
+						'Move this post to the front of the archive?',
+						'sticky-post-types'
+					)}
+					postMeta={postMeta}
+					setPostMeta={setPostMeta}
+				/>
+				<MetaDateControlInput
+					metaKey={STICKY_START_META_KEY}
+					label={__(
+						'From when should this post be sticky? (optional)',
+						'sticky-post-types'
+					)}
+					postMeta={postMeta}
+					setPostMeta={setPostMeta}
+				/>
+				<MetaDateControlInput
+					metaKey={STICKY_UNTIL_META_KEY}
+					label={__(
+						'Until when should this post be sticky? (optional)',
+						'sticky-post-types'
+					)}
 					postMeta={postMeta}
 					setPostMeta={setPostMeta}
 				/>

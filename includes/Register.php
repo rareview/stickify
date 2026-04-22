@@ -20,6 +20,8 @@ class Register {
 
 	public const PREFIX                    = 'sticky-post-types';
 	public const STICKY_META_KEY           = '_rv_sticky_post_types';
+	public const STICKY_START_META_KEY     = '_rv_sticky_post_types_start';
+	public const STICKY_UNTIL_META_KEY     = '_rv_sticky_post_types_until';
 	public const REST_API_CUSTOM_NAMESPACE = self::PREFIX . '/v1';
 
 	/**
@@ -114,19 +116,51 @@ class Register {
 	 * Register the sticky post meta.
 	 */
 	public function register_meta() {
+		$base_meta_args = [
+			'single'        => true,
+			'show_in_rest'  => true,
+			'auth_callback' => function ( $allowed, $meta_key, $post_id ) {
+				if ( ! $post_id ) {
+					return false;
+				}
+
+				return current_user_can( 'edit_post', $post_id );
+			},
+		];
+
 		foreach ( Helpers::get_sticky_post_types() as $post_type ) {
 			register_post_meta(
 				$post_type,
 				self::STICKY_META_KEY,
 				[
+					...$base_meta_args,
 					'type'              => 'boolean',
-					'single'            => true,
-					'show_in_rest'      => true,
-					'auth_callback'     => function () {
-						return current_user_can( 'edit_posts' );
-					},
 					'sanitize_callback' => function ( $value ) {
 						return filter_var( $value, FILTER_VALIDATE_BOOLEAN );
+					},
+				]
+			);
+
+			register_post_meta(
+				$post_type,
+				self::STICKY_START_META_KEY,
+				[
+					...$base_meta_args,
+					'type'              => 'integer',
+					'sanitize_callback' => function ( $value ) {
+						return absint( $value );
+					},
+				]
+			);
+
+			register_post_meta(
+				$post_type,
+				self::STICKY_UNTIL_META_KEY,
+				[
+					...$base_meta_args,
+					'type'              => 'integer',
+					'sanitize_callback' => function ( $value ) {
+						return absint( $value );
 					},
 				]
 			);
@@ -153,7 +187,11 @@ class Register {
 	 * @return void
 	 */
 	public function maybe_clear_sticky_cache_on_meta_change( $meta_id, $post_id, $meta_key, $meta_value ): void {
-		if ( Register::STICKY_META_KEY !== $meta_key ) {
+		if (
+			self::STICKY_META_KEY !== $meta_key &&
+			self::STICKY_START_META_KEY !== $meta_key &&
+			self::STICKY_UNTIL_META_KEY !== $meta_key
+		) {
 			return;
 		}
 
@@ -298,6 +336,29 @@ class Register {
 			return false;
 		}
 
-		return (bool) get_post_meta( $post_id, self::STICKY_META_KEY, true );
+		$is_sticky = (bool) get_post_meta( $post_id, self::STICKY_META_KEY, true );
+
+		if ( ! $is_sticky ) {
+			return false;
+		}
+
+		$sticky_start = absint( get_post_meta( $post_id, self::STICKY_START_META_KEY, true ) );
+		$sticky_until = absint( get_post_meta( $post_id, self::STICKY_UNTIL_META_KEY, true ) );
+
+		if ( ! $sticky_until && ! $sticky_start ) {
+			return true;
+		}
+
+		$current_time = time();
+
+		if ( $sticky_start && ! $sticky_until ) {
+			return $sticky_start <= $current_time;
+		}
+
+		if ( ! $sticky_start && $sticky_until ) {
+			return $sticky_until > $current_time;
+		}
+
+		return $sticky_start <= $current_time && $sticky_until > $current_time;
 	}
 }
