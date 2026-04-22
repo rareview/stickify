@@ -120,14 +120,26 @@ class Helpers {
 					'relation' => 'AND',
 					[
 						'key'     => Register::STICKY_META_KEY,
-						'value'   => true,
+						'value'   => '1',
 						'compare' => '=',
+						'type'    => 'NUMERIC',
 					],
 					[
 						'relation' => 'OR',
 						[
 							'key'     => Register::STICKY_START_META_KEY,
 							'compare' => 'NOT EXISTS',
+						],
+						[
+							'key'     => Register::STICKY_START_META_KEY,
+							'value'   => '',
+							'compare' => '=',
+						],
+						[
+							'key'     => Register::STICKY_START_META_KEY,
+							'value'   => 0,
+							'compare' => '=',
+							'type'    => 'NUMERIC',
 						],
 						[
 							'key'     => Register::STICKY_START_META_KEY,
@@ -141,6 +153,17 @@ class Helpers {
 						[
 							'key'     => Register::STICKY_UNTIL_META_KEY,
 							'compare' => 'NOT EXISTS',
+						],
+						[
+							'key'     => Register::STICKY_UNTIL_META_KEY,
+							'value'   => '',
+							'compare' => '=',
+						],
+						[
+							'key'     => Register::STICKY_UNTIL_META_KEY,
+							'value'   => 0,
+							'compare' => '=',
+							'type'    => 'NUMERIC',
 						],
 						[
 							'key'     => Register::STICKY_UNTIL_META_KEY,

@@ -31,7 +31,7 @@ const MetaDateControlInput = ({ metaKey, label, postMeta, setPostMeta }) => {
 					onChange={(value) => {
 						if (!value) {
 							setPostMeta({
-								[metaKey]: undefined,
+								[metaKey]: 0,
 							});
 							return;
 						}
