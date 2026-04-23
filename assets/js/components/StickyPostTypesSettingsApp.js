@@ -281,11 +281,11 @@ const StickyPostTypesSettingsApp = () => {
 		const now = Math.floor(Date.now() / 1000);
 
 		if (post?.stickyStart > now) {
-			labels.push(__('Scheduled', 'sticky-post-types'));
+			labels.push(__('Sticky (Upcoming)', 'sticky-post-types'));
 		}
 
 		if (post?.stickyUntil > 0 && post?.stickyUntil <= now) {
-			labels.push(__('Expired', 'sticky-post-types'));
+			labels.push(__('Sticky (Expired)', 'sticky-post-types'));
 		}
 
 		return labels;

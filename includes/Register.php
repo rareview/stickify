@@ -39,7 +39,6 @@ class Register {
 	public function register_editor_assets() {
 		add_action( 'init', [ $this, 'register_meta' ] );
 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
-		add_filter( 'query_loop_block_query_vars', [ $this, 'enable_sticky_for_query_loop_block' ], 10, 2 );
 		add_action( 'updated_post_meta', [ $this, 'maybe_clear_sticky_cache_on_meta_change' ], 10, 4 );
 		add_action( 'added_post_meta', [ $this, 'maybe_clear_sticky_cache_on_meta_change' ], 10, 4 );
 		add_action( 'deleted_post_meta', [ $this, 'maybe_clear_sticky_cache_on_meta_change' ], 10, 4 );
@@ -47,8 +46,10 @@ class Register {
 		add_action( 'before_delete_post', [ $this, 'maybe_clear_sticky_cache_on_delete' ] );
 		add_action( 'pre_get_posts', [ $this, 'maybe_remove_posts_from_query' ] );
 
+		add_filter( 'plugin_action_links_' . plugin_basename( dirname( __DIR__ ) . '/sticky-post-types.php' ), [ $this, 'add_settings_link_to_plugin_actions' ] );
+		add_filter( 'query_loop_block_query_vars', [ $this, 'enable_sticky_for_query_loop_block' ], 10, 2 );
 		add_filter( 'the_posts', [ $this, 'maybe_prepend_sticky_posts' ], 10, 2 );
-		add_filter( 'is_sticky', [ $this, 'evaluate_sticky_status' ] );
+		add_filter( 'is_sticky', [ $this, 'evaluate_sticky_status' ], 10, 2 );
 		add_filter( 'display_post_states', [ $this, 'maybe_add_sticky_post_state_labels' ], 10, 2 );
 	}
 
@@ -97,6 +98,23 @@ class Register {
 	}
 
 	/**
+	 * Add settings link to plugin actions on the plugins page.
+	 *
+	 * @param array $actions Existing plugin action links.
+	 *
+	 * @return array Modified plugin action links.
+	 */
+	public function add_settings_link_to_plugin_actions( array $actions ): array {
+		$settings_link = sprintf(
+			'<a href="%s">%s</a>',
+			esc_url( admin_url( 'options-general.php?page=sticky-post-types' ) ),
+			__( 'Settings', 'sticky-post-types' )
+		);
+
+		return array_merge( [ 'settings' => $settings_link ], $actions );
+	}
+
+	/**
 	 * Enable sticky post type handling for Query Loop block queries.
 	 *
 	 * @param array $query Query vars for the block query.
@@ -105,8 +123,6 @@ class Register {
 	 * @return array
 	 */
 	public function enable_sticky_for_query_loop_block( array $query, $block ): array {
-		unset( $block );
-
 		$query['sticky_post_types']            = true;
 		$query['sticky_post_types_query_loop'] = true;
 
@@ -281,7 +297,7 @@ class Register {
 	public function maybe_prepend_sticky_posts( $posts, $query ) {
 		$post_type = self::get_sticky_query_post_type( $query );
 
-		if ( ! $post_type ) {
+		if ( ! $post_type || $query->is_singular() ) {
 			return $posts;
 		}
 
@@ -321,13 +337,13 @@ class Register {
 	 * @param int $sticky_start Sticky start timestamp.
 	 * @param int $sticky_until Sticky until timestamp.
 	 *
-	 * @return string One of active, scheduled, or expired.
+	 * @return string One of active, upcoming, or expired.
 	 */
 	private static function get_sticky_window_status( int $sticky_start, int $sticky_until ): string {
 		$current_time = time();
 
 		if ( $sticky_start > 0 && $sticky_start > $current_time ) {
-			return 'scheduled';
+			return 'upcoming';
 		}
 
 		if ( $sticky_until > 0 && $sticky_until <= $current_time ) {
@@ -361,12 +377,12 @@ class Register {
 		$sticky_start = absint( get_post_meta( $post->ID, self::STICKY_START_META_KEY, true ) );
 		$sticky_until = absint( get_post_meta( $post->ID, self::STICKY_UNTIL_META_KEY, true ) );
 
-		if ( $sticky_start > 0 && 'scheduled' === self::get_sticky_window_status( $sticky_start, $sticky_until ) ) {
-			$post_states['sticky-post-types-scheduled'] = __( 'Scheduled', 'sticky-post-types' );
+		if ( $sticky_start > 0 && 'upcoming' === self::get_sticky_window_status( $sticky_start, $sticky_until ) ) {
+			$post_states['sticky-post-types-upcoming'] = __( 'Sticky (Upcoming)', 'sticky-post-types' );
 		}
 
 		if ( $sticky_until > 0 && 'expired' === self::get_sticky_window_status( $sticky_start, $sticky_until ) ) {
-			$post_states['sticky-post-types-expired'] = __( 'Expired', 'sticky-post-types' );
+			$post_states['sticky-post-types-expired'] = __( 'Sticky (Expired)', 'sticky-post-types' );
 		}
 
 		return $post_states;
@@ -376,11 +392,12 @@ class Register {
 	 * Determine if a post should be considered sticky, adds "- Sticky" flag in
 	 * the admin and resolves boolean for frontend templates.
 	 *
-	 * @param int $post_id The current post's ID.
+	 * @param bool $is_sticky The current sticky status determined by previous filters.
+	 * @param int  $post_id The current post's ID.
 	 *
 	 * @return bool Whether the current post is sticky.
 	 */
-	public function evaluate_sticky_status( int $post_id ): bool {
+	public function evaluate_sticky_status( bool $is_sticky, int $post_id ): bool {
 		$post_id = absint( $post_id );
 
 		if ( ! $post_id ) {
@@ -391,12 +408,12 @@ class Register {
 		$post_type         = get_post_type( $post_id );
 
 		if ( ! in_array( $post_type, $sticky_post_types, true ) ) {
-			return false;
+			return $is_sticky;
 		}
 
-		$is_sticky = (bool) get_post_meta( $post_id, self::STICKY_META_KEY, true );
+		$is_custom_sticky = (bool) get_post_meta( $post_id, self::STICKY_META_KEY, true );
 
-		if ( ! $is_sticky ) {
+		if ( ! $is_custom_sticky ) {
 			return false;
 		}
 
