@@ -413,6 +413,10 @@ class Register {
 
 		$is_custom_sticky = (bool) get_post_meta( $post_id, self::STICKY_META_KEY, true );
 
+		if ( 'post' === $post_type && ! $is_custom_sticky ) {
+			return $is_sticky;
+		}
+
 		if ( ! $is_custom_sticky ) {
 			return false;
 		}

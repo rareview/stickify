@@ -208,4 +208,57 @@ class Helpers {
 
 		delete_transient( self::STICKY_CACHE_KEY . '-' . $post_type );
 	}
+
+	/**
+	 * Remove a post ID from core sticky posts.
+	 *
+	 * @param int $post_id Post ID.
+	 *
+	 * @return void
+	 */
+	public static function remove_core_sticky_post( int $post_id ): void {
+		$post_id  = absint( $post_id );
+		$stickies = get_option( 'sticky_posts', [] );
+
+		if ( ! is_array( $stickies ) || ! $post_id ) {
+			return;
+		}
+
+		$stickies = array_values(
+			array_filter(
+				array_map( 'absint', $stickies ),
+				function ( $sticky_id ) use ( $post_id ) {
+					return $sticky_id !== $post_id;
+				}
+			)
+		);
+
+		update_option( 'sticky_posts', $stickies );
+	}
+
+	/**
+	 * Add a post ID to core sticky posts.
+	 *
+	 * @param int $post_id Post ID.
+	 *
+	 * @return void
+	 */
+	public static function add_core_sticky_post( int $post_id ): void {
+		$post_id  = absint( $post_id );
+		$stickies = get_option( 'sticky_posts', [] );
+
+		if ( ! is_array( $stickies ) ) {
+			$stickies = [];
+		}
+
+		$stickies = array_map( 'absint', $stickies );
+
+		if ( ! $post_id || in_array( $post_id, $stickies, true ) ) {
+			return;
+		}
+
+		$stickies[] = $post_id;
+
+		update_option( 'sticky_posts', $stickies );
+	}
 }

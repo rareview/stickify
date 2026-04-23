@@ -17,7 +17,13 @@ const STICKY_START_META_KEY = '_rv_sticky_post_types_start';
 import MetaToggleControlInput from './MetaToggleControlInput';
 import MetaDateControlInput from './MetaDateControlInput';
 
-const StickyPostTypesSidebar = ({ postType, postMeta, setPostMeta }) => {
+const StickyPostTypesSidebar = ({
+	postType,
+	postMeta,
+	setPostMeta,
+	updateStickyState,
+	coreSticky
+}) => {
 	const [isLoading, setIsLoading] = useState(true);
 	const [postTypes, setPostTypes] = useState([]);
 
@@ -40,12 +46,12 @@ const StickyPostTypesSidebar = ({ postType, postMeta, setPostMeta }) => {
 		};
 
 		fetchStickyPostTypes();
-	}, [isLoading]);
+	}, []);
 
 	const supportsCustomFields = useSelect((select) => {
 		const settings = select('core').getPostType(postType);
-		return settings.supports['custom-fields'] || false;
-	}, []);
+		return settings?.supports?.['custom-fields'] || false;
+	}, [postType]);
 
 	if (
 		!isLoading &&
@@ -53,6 +59,12 @@ const StickyPostTypesSidebar = ({ postType, postMeta, setPostMeta }) => {
 		postTypes.includes(postType) &&
 		supportsCustomFields
 	) {
+
+		const isStickyEnabled =
+			'post' === postType
+				? Boolean(coreSticky) || Boolean(postMeta?.[STICKY_META_KEY])
+				: Boolean(postMeta?.[STICKY_META_KEY]);
+
 		return (
 			<PluginDocumentSettingPanel
 				title={__('Sticky Post Types Settings', 'sticky-post-types')}
@@ -65,27 +77,34 @@ const StickyPostTypesSidebar = ({ postType, postMeta, setPostMeta }) => {
 						'Move this post to the front of the archive?',
 						'sticky-post-types'
 					)}
+					postType={postType}
 					postMeta={postMeta}
-					setPostMeta={setPostMeta}
+					updateStickyState={updateStickyState}
+					coreSticky={coreSticky}
 				/>
-				<MetaDateControlInput
-					metaKey={STICKY_START_META_KEY}
-					label={__(
-						'From when should this post be sticky? (optional)',
-						'sticky-post-types'
-					)}
-					postMeta={postMeta}
-					setPostMeta={setPostMeta}
-				/>
-				<MetaDateControlInput
-					metaKey={STICKY_UNTIL_META_KEY}
-					label={__(
-						'Until when should this post be sticky? (optional)',
-						'sticky-post-types'
-					)}
-					postMeta={postMeta}
-					setPostMeta={setPostMeta}
-				/>
+
+				{isStickyEnabled && (
+					<>
+						<MetaDateControlInput
+							metaKey={STICKY_START_META_KEY}
+							label={__(
+								'From when should this post be sticky? (optional)',
+								'sticky-post-types'
+							)}
+							postMeta={postMeta}
+							setPostMeta={setPostMeta}
+						/>
+						<MetaDateControlInput
+							metaKey={STICKY_UNTIL_META_KEY}
+							label={__(
+								'Until when should this post be sticky? (optional)',
+								'sticky-post-types'
+							)}
+							postMeta={postMeta}
+							setPostMeta={setPostMeta}
+						/>
+					</>
+				)}
 			</PluginDocumentSettingPanel>
 		);
 	}
@@ -101,13 +120,42 @@ const StickyPostTypesSidebar = ({ postType, postMeta, setPostMeta }) => {
 
 export default compose([
 	withSelect((select) => {
-		return {
+		const postType = select('core/editor').getCurrentPostType();
+
+		const returnAttributes = {
 			postMeta: select('core/editor').getEditedPostAttribute('meta'),
-			postType: select('core/editor').getCurrentPostType(),
+			postType,
+			coreSticky: false,
 		};
+
+		if ('post' === postType) {
+			returnAttributes.coreSticky = Boolean(
+				select('core/editor').getEditedPostAttribute('sticky')
+			);
+		}
+
+		return returnAttributes;
 	}),
 	withDispatch((dispatch) => {
 		return {
+			updateStickyState(postType, metaKey, value) {
+				const updates = {
+					meta: {
+						[metaKey]: value,
+					},
+				};
+
+				if (!value) {
+					updates.meta[STICKY_START_META_KEY] = undefined;
+					updates.meta[STICKY_UNTIL_META_KEY] = undefined;
+				}
+
+				if ('post' === postType) {
+					updates.sticky = value;
+				}
+
+				dispatch('core/editor').editPost(updates);
+			},
 			setPostMeta(newMeta) {
 				dispatch('core/editor').editPost({ meta: newMeta });
 			},

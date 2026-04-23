@@ -237,11 +237,13 @@ class Settings {
 	protected function get_public_custom_post_types() {
 		$post_types = get_post_types(
 			[
-				'public'   => true,
-				'_builtin' => false,
+				'public' => true,
 			],
 			'objects'
 		);
+
+		// Exclude select built-in post types that aren't relevant for sticky functionality.
+		unset( $post_types['page'], $post_types['attachment'] );
 
 		$labels = [];
 

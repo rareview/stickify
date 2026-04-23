@@ -134,6 +134,20 @@ class Rest {
 				]
 			);
 
+			if ( 'post' === $post_type ) {
+				$core_sticky_ids = get_option( 'sticky_posts', [] );
+
+				if ( is_array( $core_sticky_ids ) ) {
+					$core_sticky_ids = array_map( 'absint', $core_sticky_ids );
+					$post_ids       = array_unique(
+						array_merge(
+							$post_ids,
+							$core_sticky_ids,
+						),
+					);
+				}
+			}
+
 			$posts = array_map(
 				function ( $post_id ) {
 					$post = get_post( $post_id );
@@ -197,6 +211,10 @@ class Rest {
 			delete_post_meta( $post_id, Register::STICKY_META_KEY );
 			delete_post_meta( $post_id, Register::STICKY_START_META_KEY );
 			delete_post_meta( $post_id, Register::STICKY_UNTIL_META_KEY );
+
+			if ( 'post' === $post->post_type ) {
+				Helpers::remove_core_sticky_post( $post_id );
+			}
 
 			$affected_types[ $post->post_type ] = true;
 			++$cleared_count;
