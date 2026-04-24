@@ -3,7 +3,7 @@
   "meta": {
     "title": "Stickify Playground",
     "author": "rareview",
-    "description": "Install and activate Stickify in WordPress Playground with sample data."
+    "description": "Install and activate Stickify in WordPress Playground with sample post data."
   },
   "landingPage": "/wp-admin/options-general.php?page=stickify",
   "preferredVersions": {

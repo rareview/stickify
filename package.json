@@ -39,7 +39,8 @@
     "lint:plugin:json": "jsonlint",
     "lint:plugin:php": "composer lint",
     "release": "commit-and-tag-version --no-verify",
-    "prepare": "husky"
+    "prepare": "husky",
+    "build:zip": "rm -rf playground/stickify && mkdir -p playground && rsync -av --exclude-from='.distignore' ./ playground/stickify/ && cd playground && zip -r stickify.zip stickify && rm -rf stickify"
   },
   "standard": {
     "parser": "babel-eslint"
