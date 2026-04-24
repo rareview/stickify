@@ -12,10 +12,14 @@
  * @package Stickify
  */
 
-// Require Composer autoloader if it exists.
-if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
-	require_once __DIR__ . '/vendor/autoload.php';
-	new Stickify\Inc\StickifyServiceProvider();
-} else {
-	wp_die( 'You must install Composer packages before running this plugin.' );
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
 }
+
+require_once __DIR__ . '/includes/Helpers.php';
+require_once __DIR__ . '/includes/Register.php';
+require_once __DIR__ . '/includes/Rest.php';
+require_once __DIR__ . '/includes/Settings.php';
+require_once __DIR__ . '/includes/StickifyServiceProvider.php';
+
+new Stickify\Inc\StickifyServiceProvider();
