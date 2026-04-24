@@ -16,7 +16,7 @@
       "step": "installTheme",
       "themeData": {
         "resource": "url",
-        "url": "https://raw.githubusercontent.com/rareview/stickify/blob/main/playground/blueprint-theme.zip"
+        "url": "https://raw.githubusercontent.com/rareview/stickify/main/playground/blueprint-theme.zip"
       },
       "options": {
         "activate": true,
@@ -27,14 +27,14 @@
       "step": "importWxr",
       "file": {
         "resource": "url",
-        "url": "https://raw.githubusercontent.com/rareview/stickify/blob/main/playground/content/blueprint-content.xml"
+        "url": "https://raw.githubusercontent.com/rareview/stickify/main/playground/content/blueprint-content.xml"
       }
     },
     {
       "step": "installPlugin",
       "pluginData": {
         "resource": "url",
-        "url": "https://raw.githubusercontent.com/rareview/stickify/blob/main/playground/stickify.zip"
+        "url": "https://raw.githubusercontent.com/rareview/stickify/main/playground/stickify.zip"
       },
       "options": {
         "activate": true,

@@ -266,7 +266,7 @@ class Register {
 	public function maybe_remove_posts_from_query( $query ) {
 		$post_type = self::get_stickify_query_post_type( $query );
 
-		if ( ! $post_type ) {
+		if ( ! $post_type || $query->is_singular() || $query->is_single() || $query->is_search() ) {
 			return;
 		}
 
@@ -297,7 +297,7 @@ class Register {
 	public function maybe_prepend_stickify_posts( $posts, $query ) {
 		$post_type = self::get_stickify_query_post_type( $query );
 
-		if ( ! $post_type || $query->is_singular() ) {
+		if ( ! $post_type || $query->is_singular() || $query->is_single() || $query->is_search() ) {
 			return $posts;
 		}
 
