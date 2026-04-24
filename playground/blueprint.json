@@ -1,0 +1,45 @@
+{
+  "$schema": "https://playground.wordpress.net/blueprint-schema.json",
+  "meta": {
+    "title": "Stickify Playground",
+    "author": "rareview",
+    "description": "Install and activate Stickify in WordPress Playground with sample data."
+  },
+  "landingPage": "/wp-admin/options-general.php?page=stickify",
+  "preferredVersions": {
+    "php": "8.2",
+    "wp": "latest"
+  },
+  "login": true,
+  "steps": [
+    {
+      "step": "installTheme",
+      "themeData": {
+        "resource": "bundled",
+        "path": "/blueprint-theme.zip"
+      },
+      "options": {
+        "activate": true,
+        "targetFolderName": "blueprint-theme"
+      }
+    },
+    {
+      "step": "importWxr",
+      "file": {
+        "resource": "bundled",
+        "path": "/content/blueprint-content.xml"
+      }
+    },
+    {
+      "step": "installPlugin",
+      "pluginData": {
+        "resource": "bundled",
+        "path": "/stickify.zip"
+      },
+      "options": {
+        "activate": true,
+        "targetFolderName": "stickify"
+      }
+    }
+  ]
+}

@@ -5,6 +5,7 @@
 /.wordpress-org
 /node_modules
 /docs
+/playground
 
 commitlint.config.js
 readme.md
