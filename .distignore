@@ -9,6 +9,7 @@
 
 commitlint.config.js
 readme.md
+renovate.json
 stylelint.config.mjs
 webpack.config.js
 
