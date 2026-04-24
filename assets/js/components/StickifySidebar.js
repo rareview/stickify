@@ -7,9 +7,9 @@ const { withSelect, withDispatch, useSelect } = wp.data;
 const { PluginDocumentSettingPanel } = wp.editPost;
 const { useEffect, useState } = wp.element;
 const { __ } = wp.i18n;
-const STICKY_META_KEY = '_rv_sticky_post_types';
-const STICKY_UNTIL_META_KEY = '_rv_sticky_post_types_until';
-const STICKY_START_META_KEY = '_rv_sticky_post_types_start';
+const STICKIFY_META_KEY = '_stickify_sticky';
+const STICKIFY_UNTIL_META_KEY = '_stickify_sticky_until';
+const STICKIFY_START_META_KEY = '_stickify_sticky_start';
 
 /**
  * Internal dependencies
@@ -17,7 +17,7 @@ const STICKY_START_META_KEY = '_rv_sticky_post_types_start';
 import MetaToggleControlInput from './MetaToggleControlInput';
 import MetaDateControlInput from './MetaDateControlInput';
 
-const StickyPostTypesSidebar = ({
+const StickifySidebar = ({
 	postType,
 	postMeta,
 	setPostMeta,
@@ -31,10 +31,10 @@ const StickyPostTypesSidebar = ({
 	 * Fetch events from the REST API.
 	 */
 	useEffect(() => {
-		const fetchStickyPostTypes = async () => {
+		const fetchStickify = async () => {
 			try {
 				const response = await apiFetch({
-					path: '/sticky-post-types/v1/post-types',
+					path: '/stickify/v1/post-types',
 				});
 
 				setPostTypes(response);
@@ -45,7 +45,7 @@ const StickyPostTypesSidebar = ({
 			}
 		};
 
-		fetchStickyPostTypes();
+		fetchStickify();
 	}, []);
 
 	const supportsCustomFields = useSelect((select) => {
@@ -62,20 +62,20 @@ const StickyPostTypesSidebar = ({
 
 		const isStickyEnabled =
 			'post' === postType
-				? Boolean(coreSticky) || Boolean(postMeta?.[STICKY_META_KEY])
-				: Boolean(postMeta?.[STICKY_META_KEY]);
+				? Boolean(coreSticky) || Boolean(postMeta?.[STICKIFY_META_KEY])
+				: Boolean(postMeta?.[STICKIFY_META_KEY]);
 
 		return (
 			<PluginDocumentSettingPanel
-				title={__('Sticky Post Types Settings', 'sticky-post-types')}
+				title={__('Stickify Settings', 'stickify')}
 				icon="edit"
 				initialOpen="true"
 			>
 				<MetaToggleControlInput
-					metaKey={STICKY_META_KEY}
+					metaKey={STICKIFY_META_KEY}
 					label={__(
 						'Move this post to the front of the archive?',
-						'sticky-post-types'
+						'stickify'
 					)}
 					postType={postType}
 					postMeta={postMeta}
@@ -86,19 +86,19 @@ const StickyPostTypesSidebar = ({
 				{isStickyEnabled && (
 					<>
 						<MetaDateControlInput
-							metaKey={STICKY_START_META_KEY}
+							metaKey={STICKIFY_START_META_KEY}
 							label={__(
 								'From when should this post be sticky? (optional)',
-								'sticky-post-types'
+								'stickify'
 							)}
 							postMeta={postMeta}
 							setPostMeta={setPostMeta}
 						/>
 						<MetaDateControlInput
-							metaKey={STICKY_UNTIL_META_KEY}
+							metaKey={STICKIFY_UNTIL_META_KEY}
 							label={__(
 								'Until when should this post be sticky? (optional)',
-								'sticky-post-types'
+								'stickify'
 							)}
 							postMeta={postMeta}
 							setPostMeta={setPostMeta}
@@ -146,8 +146,8 @@ export default compose([
 				};
 
 				if (!value) {
-					updates.meta[STICKY_START_META_KEY] = undefined;
-					updates.meta[STICKY_UNTIL_META_KEY] = undefined;
+					updates.meta[STICKIFY_START_META_KEY] = undefined;
+					updates.meta[STICKIFY_UNTIL_META_KEY] = undefined;
 				}
 
 				if ('post' === postType) {
@@ -161,4 +161,4 @@ export default compose([
 			},
 		};
 	}),
-])(StickyPostTypesSidebar);
+])(StickifySidebar);

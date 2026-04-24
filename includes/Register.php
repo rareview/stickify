@@ -4,12 +4,12 @@
  *
  * @author Rareview <hello@rareview.com>
  *
- * @package StickyPostTypes
+ * @package Stickify
  */
 
-namespace StickyPostTypes\Inc;
+namespace Stickify\Inc;
 
-use StickyPostTypes\Inc\Helpers;
+use Stickify\Inc\Helpers;
 use WP_Post;
 use WP_Query;
 
@@ -18,10 +18,10 @@ use WP_Query;
  */
 class Register {
 
-	public const PREFIX                    = 'sticky-post-types';
-	public const STICKY_META_KEY           = '_rv_sticky_post_types';
-	public const STICKY_START_META_KEY     = '_rv_sticky_post_types_start';
-	public const STICKY_UNTIL_META_KEY     = '_rv_sticky_post_types_until';
+	public const PREFIX                    = 'stickify';
+	public const STICKIFY_META_KEY         = '_' . self::PREFIX . '_sticky';
+	public const STICKIFY_START_META_KEY   = '_' . self::PREFIX . '_sticky_start';
+	public const STICKIFY_UNTIL_META_KEY   = '_' . self::PREFIX . '_sticky_until';
 	public const REST_API_CUSTOM_NAMESPACE = self::PREFIX . '/v1';
 
 	/**
@@ -39,18 +39,18 @@ class Register {
 	public function register_editor_assets() {
 		add_action( 'init', [ $this, 'register_meta' ] );
 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
-		add_action( 'updated_post_meta', [ $this, 'maybe_clear_sticky_cache_on_meta_change' ], 10, 4 );
-		add_action( 'added_post_meta', [ $this, 'maybe_clear_sticky_cache_on_meta_change' ], 10, 4 );
-		add_action( 'deleted_post_meta', [ $this, 'maybe_clear_sticky_cache_on_meta_change' ], 10, 4 );
-		add_action( 'save_post', [ $this, 'maybe_clear_sticky_cache_on_save' ], 10, 2 );
-		add_action( 'before_delete_post', [ $this, 'maybe_clear_sticky_cache_on_delete' ] );
+		add_action( 'updated_post_meta', [ $this, 'maybe_clear_stickify_cache_on_meta_change' ], 10, 4 );
+		add_action( 'added_post_meta', [ $this, 'maybe_clear_stickify_cache_on_meta_change' ], 10, 4 );
+		add_action( 'deleted_post_meta', [ $this, 'maybe_clear_stickify_cache_on_meta_change' ], 10, 4 );
+		add_action( 'save_post', [ $this, 'maybe_clear_stickify_cache_on_save' ], 10, 2 );
+		add_action( 'before_delete_post', [ $this, 'maybe_clear_stickify_cache_on_delete' ] );
 		add_action( 'pre_get_posts', [ $this, 'maybe_remove_posts_from_query' ] );
 
-		add_filter( 'plugin_action_links_' . plugin_basename( dirname( __DIR__ ) . '/sticky-post-types.php' ), [ $this, 'add_settings_link_to_plugin_actions' ] );
-		add_filter( 'query_loop_block_query_vars', [ $this, 'enable_sticky_for_query_loop_block' ], 10, 2 );
-		add_filter( 'the_posts', [ $this, 'maybe_prepend_sticky_posts' ], 10, 2 );
-		add_filter( 'is_sticky', [ $this, 'evaluate_sticky_status' ], 10, 2 );
-		add_filter( 'display_post_states', [ $this, 'maybe_add_sticky_post_state_labels' ], 10, 2 );
+		add_filter( 'plugin_action_links_' . plugin_basename( dirname( __DIR__ ) . '/stickify.php' ), [ $this, 'add_settings_link_to_plugin_actions' ] );
+		add_filter( 'query_loop_block_query_vars', [ $this, 'enable_stickify_for_query_loop_block' ], 10, 2 );
+		add_filter( 'the_posts', [ $this, 'maybe_prepend_stickify_posts' ], 10, 2 );
+		add_filter( 'is_sticky', [ $this, 'evaluate_stickify_status' ], 10, 2 );
+		add_filter( 'display_post_states', [ $this, 'maybe_add_stickify_post_state_labels' ], 10, 2 );
 	}
 
 	/**
@@ -60,17 +60,17 @@ class Register {
 	 *
 	 * @return string|null Supported post type or null.
 	 */
-	private static function get_sticky_query_post_type( WP_Query $query ): ?string {
-		if ( false === $query->get( 'sticky_post_types', true ) ) {
+	private static function get_stickify_query_post_type( WP_Query $query ): ?string {
+		if ( false === $query->get( 'stickify_post_types', true ) ) {
 			return null;
 		}
 
-		if ( $query->get( 'ignore_sticky_posts' ) ) {
+		if ( $query->get( 'ignore_stickify_posts' ) ) {
 			return null;
 		}
 
 		$is_rest_request = ( function_exists( 'wp_is_serving_rest_request' ) && wp_is_serving_rest_request() ) || ( defined( 'REST_REQUEST' ) && REST_REQUEST );
-		$is_query_loop   = (bool) $query->get( 'sticky_post_types_query_loop', false );
+		$is_query_loop   = (bool) $query->get( 'stickify_post_types_query_loop', false );
 
 		if ( ! $is_rest_request && ! $is_query_loop && ( is_admin() || ! $query->is_main_query() ) ) {
 			return null;
@@ -82,11 +82,11 @@ class Register {
 			return null;
 		}
 
-		$post_types        = array_values( (array) $post_types );
-		$sticky_post_types = Helpers::get_sticky_post_types();
+		$post_types          = array_values( (array) $post_types );
+		$stickify_post_types = Helpers::get_stickify_post_types();
 
 		$matching_types = array_values(
-			array_intersect( $post_types, $sticky_post_types )
+			array_intersect( $post_types, $stickify_post_types )
 		);
 
 		// Only support single post type queries (for now).
@@ -107,8 +107,8 @@ class Register {
 	public function add_settings_link_to_plugin_actions( array $actions ): array {
 		$settings_link = sprintf(
 			'<a href="%s">%s</a>',
-			esc_url( admin_url( 'options-general.php?page=sticky-post-types' ) ),
-			__( 'Settings', 'sticky-post-types' )
+			esc_url( admin_url( 'options-general.php?page=stickify' ) ),
+			__( 'Settings', 'stickify' )
 		);
 
 		return array_merge( [ 'settings' => $settings_link ], $actions );
@@ -122,15 +122,15 @@ class Register {
 	 *
 	 * @return array
 	 */
-	public function enable_sticky_for_query_loop_block( array $query, $block ): array {
-		$query['sticky_post_types']            = true;
-		$query['sticky_post_types_query_loop'] = true;
+	public function enable_stickify_for_query_loop_block( array $query, $block ): array {
+		$query['stickify_post_types']            = true;
+		$query['stickify_post_types_query_loop'] = true;
 
 		return $query;
 	}
 
 	/**
-	 * Register the sticky post meta.
+	 * Register the stickify post meta.
 	 */
 	public function register_meta() {
 		$base_meta_args = [
@@ -145,10 +145,10 @@ class Register {
 			},
 		];
 
-		foreach ( Helpers::get_sticky_post_types() as $post_type ) {
+		foreach ( Helpers::get_stickify_post_types() as $post_type ) {
 			register_post_meta(
 				$post_type,
-				self::STICKY_META_KEY,
+				self::STICKIFY_META_KEY,
 				[
 					...$base_meta_args,
 					'type'              => 'boolean',
@@ -160,7 +160,7 @@ class Register {
 
 			register_post_meta(
 				$post_type,
-				self::STICKY_START_META_KEY,
+				self::STICKIFY_START_META_KEY,
 				[
 					...$base_meta_args,
 					'type'              => 'integer',
@@ -172,7 +172,7 @@ class Register {
 
 			register_post_meta(
 				$post_type,
-				self::STICKY_UNTIL_META_KEY,
+				self::STICKIFY_UNTIL_META_KEY,
 				[
 					...$base_meta_args,
 					'type'              => 'integer',
@@ -194,7 +194,7 @@ class Register {
 	}
 
 	/**
-	 * Maybe clear sticky cache when sticky meta changes.
+	 * Maybe clear stickify cache when stickify meta changes.
 	 *
 	 * @param int    $meta_id    Meta ID.
 	 * @param int    $post_id    Post ID.
@@ -203,11 +203,11 @@ class Register {
 	 *
 	 * @return void
 	 */
-	public function maybe_clear_sticky_cache_on_meta_change( $meta_id, $post_id, $meta_key, $meta_value ): void {
+	public function maybe_clear_stickify_cache_on_meta_change( $meta_id, $post_id, $meta_key, $meta_value ): void {
 		if (
-			self::STICKY_META_KEY !== $meta_key &&
-			self::STICKY_START_META_KEY !== $meta_key &&
-			self::STICKY_UNTIL_META_KEY !== $meta_key
+			self::STICKIFY_META_KEY !== $meta_key &&
+			self::STICKIFY_START_META_KEY !== $meta_key &&
+			self::STICKIFY_UNTIL_META_KEY !== $meta_key
 		) {
 			return;
 		}
@@ -218,18 +218,18 @@ class Register {
 			return;
 		}
 
-		Helpers::delete_sticky_posts_cache_by_type( $post_type );
+		Helpers::delete_stickify_cache_by_type( $post_type );
 	}
 
 	/**
-	 * Maybe clear sticky cache when a post is saved.
+	 * Maybe clear stickify cache when a post is saved.
 	 *
 	 * @param int     $post_id Post ID.
 	 * @param WP_Post $post    Post object.
 	 *
 	 * @return void
 	 */
-	public function maybe_clear_sticky_cache_on_save( $post_id, $post ): void {
+	public function maybe_clear_stickify_cache_on_save( $post_id, $post ): void {
 		if ( wp_is_post_revision( $post_id ) ) {
 			return;
 		}
@@ -238,24 +238,24 @@ class Register {
 			return;
 		}
 
-		Helpers::delete_sticky_posts_cache_by_type( $post->post_type );
+		Helpers::delete_stickify_cache_by_type( $post->post_type );
 	}
 
 	/**
-	 * Maybe clear sticky cache when a post is deleted.
+	 * Maybe clear stickify cache when a post is deleted.
 	 *
 	 * @param int $post_id Post ID.
 	 *
 	 * @return void
 	 */
-	public function maybe_clear_sticky_cache_on_delete( $post_id ): void {
+	public function maybe_clear_stickify_cache_on_delete( $post_id ): void {
 		$post_type = get_post_type( $post_id );
 
 		if ( empty( $post_type ) ) {
 			return;
 		}
 
-		Helpers::delete_sticky_posts_cache_by_type( $post_type );
+		Helpers::delete_stickify_cache_by_type( $post_type );
 	}
 
 	/**
@@ -264,38 +264,38 @@ class Register {
 	 * @param WP_Query $query The current query.
 	 */
 	public function maybe_remove_posts_from_query( $query ) {
-		$post_type = self::get_sticky_query_post_type( $query );
+		$post_type = self::get_stickify_query_post_type( $query );
 
 		if ( ! $post_type ) {
 			return;
 		}
 
-		$sticky_ids = Helpers::get_sticky_posts_by_type( $post_type );
+		$stickify_ids = Helpers::get_stickify_posts_by_type( $post_type );
 
-		if ( empty( $sticky_ids ) ) {
+		if ( empty( $stickify_ids ) ) {
 			return;
 		}
 
 		$post__not_in = $query->get( 'post__not_in', [] );
 		$post__not_in = array_map( 'absint', (array) $post__not_in );
-		$sticky_ids   = array_map( 'absint', $sticky_ids );
+		$stickify_ids   = array_map( 'absint', $stickify_ids );
 
 		$query->set(
 			'post__not_in',
-			array_values( array_unique( array_merge( $post__not_in, $sticky_ids ) ) )
+			array_values( array_unique( array_merge( $post__not_in, $stickify_ids ) ) )
 		);
 	}
 
 	/**
-	 * Conditionally add sticky posts to the front of the query.
+	 * Conditionally add stickify posts to the front of the query.
 	 *
 	 * @param WP_Post  $posts Array of post objects.
 	 * @param WP_Query $query The current query.
 	 *
 	 * @return WP_Post|array The original or merged posts array.
 	 */
-	public function maybe_prepend_sticky_posts( $posts, $query ) {
-		$post_type = self::get_sticky_query_post_type( $query );
+	public function maybe_prepend_stickify_posts( $posts, $query ) {
+		$post_type = self::get_stickify_query_post_type( $query );
 
 		if ( ! $post_type || $query->is_singular() ) {
 			return $posts;
@@ -305,25 +305,27 @@ class Register {
 			return $posts;
 		}
 
-		$sticky_ids = Helpers::get_sticky_posts_by_type( $post_type );
+		$stickify_ids = Helpers::get_stickify_posts_by_type( $post_type );
 
-		if ( empty( $sticky_ids ) ) {
+		if ( empty( $stickify_ids ) ) {
 			return $posts;
 		}
 
-		$sticky_posts = get_posts(
+		$stickify_posts = get_posts(
 			[
-				'post__in'         => $sticky_ids,
+				'post__in'         => $stickify_ids,
 				'post_type'        => $post_type,
 				'orderby'          => 'post__in',
-				'posts_per_page'   => count( $sticky_ids ),
+				'posts_per_page'   => count( $stickify_ids ),
+				'stickify_post_types'   => false,
+				'ignore_stickify_posts' => true,
 				'suppress_filters' => false, // phpcs:ignore
 			]
 		);
 
-		$merged_posts = array_merge( $sticky_posts, $posts );
+		$merged_posts = array_merge( $stickify_posts, $posts );
 
-		// Keep the original query page size after prepending sticky posts.
+		// Keep the original query page size after prepending stickify posts.
 		if ( count( $posts ) > 0 ) {
 			return array_slice( $merged_posts, 0, count( $posts ) );
 		}
@@ -332,21 +334,21 @@ class Register {
 	}
 
 	/**
-	 * Get sticky window status for a post.
+	 * Get stickify window status for a post.
 	 *
-	 * @param int $sticky_start Sticky start timestamp.
-	 * @param int $sticky_until Sticky until timestamp.
+	 * @param int $stickify_start Stickify start timestamp.
+	 * @param int $stickify_until Stickify until timestamp.
 	 *
 	 * @return string One of active, upcoming, or expired.
 	 */
-	private static function get_sticky_window_status( int $sticky_start, int $sticky_until ): string {
+	private static function get_stickify_window_status( int $stickify_start, int $stickify_until ): string {
 		$current_time = time();
 
-		if ( $sticky_start > 0 && $sticky_start > $current_time ) {
+		if ( $stickify_start > 0 && $stickify_start > $current_time ) {
 			return 'upcoming';
 		}
 
-		if ( $sticky_until > 0 && $sticky_until <= $current_time ) {
+		if ( $stickify_until > 0 && $stickify_until <= $current_time ) {
 			return 'expired';
 		}
 
@@ -354,35 +356,35 @@ class Register {
 	}
 
 	/**
-	 * Add sticky schedule state labels to admin post list rows.
+	 * Add stickify schedule state labels to admin post list rows.
 	 *
 	 * @param array   $post_states Existing post state labels.
 	 * @param WP_Post $post        Current post object.
 	 *
 	 * @return array
 	 */
-	public function maybe_add_sticky_post_state_labels( array $post_states, WP_Post $post ): array {
-		$sticky_post_types = Helpers::get_sticky_post_types();
+	public function maybe_add_stickify_post_state_labels( array $post_states, WP_Post $post ): array {
+		$stickify_post_types = Helpers::get_stickify_post_types();
 
-		if ( ! in_array( $post->post_type, $sticky_post_types, true ) ) {
+		if ( ! in_array( $post->post_type, $stickify_post_types, true ) ) {
 			return $post_states;
 		}
 
-		$is_sticky = (bool) get_post_meta( $post->ID, self::STICKY_META_KEY, true );
+		$is_stickified = (bool) get_post_meta( $post->ID, self::STICKIFY_META_KEY, true );
 
-		if ( ! $is_sticky ) {
+		if ( ! $is_stickified ) {
 			return $post_states;
 		}
 
-		$sticky_start = absint( get_post_meta( $post->ID, self::STICKY_START_META_KEY, true ) );
-		$sticky_until = absint( get_post_meta( $post->ID, self::STICKY_UNTIL_META_KEY, true ) );
+		$stickify_start = absint( get_post_meta( $post->ID, self::STICKIFY_START_META_KEY, true ) );
+		$stickify_until = absint( get_post_meta( $post->ID, self::STICKIFY_UNTIL_META_KEY, true ) );
 
-		if ( $sticky_start > 0 && 'upcoming' === self::get_sticky_window_status( $sticky_start, $sticky_until ) ) {
-			$post_states['sticky-post-types-upcoming'] = __( 'Sticky (Upcoming)', 'sticky-post-types' );
+		if ( $stickify_start > 0 && 'upcoming' === self::get_stickify_window_status( $stickify_start, $stickify_until ) ) {
+			$post_states['stickify-upcoming'] = __( 'Sticky (Upcoming)', 'stickify' );
 		}
 
-		if ( $sticky_until > 0 && 'expired' === self::get_sticky_window_status( $sticky_start, $sticky_until ) ) {
-			$post_states['sticky-post-types-expired'] = __( 'Sticky (Expired)', 'sticky-post-types' );
+		if ( $stickify_until > 0 && 'expired' === self::get_stickify_window_status( $stickify_start, $stickify_until ) ) {
+			$post_states['stickify-expired'] = __( 'Sticky (Expired)', 'stickify' );
 		}
 
 		return $post_states;
@@ -397,21 +399,21 @@ class Register {
 	 *
 	 * @return bool Whether the current post is sticky.
 	 */
-	public function evaluate_sticky_status( bool $is_sticky, int $post_id ): bool {
+	public function evaluate_stickify_status( bool $is_sticky, int $post_id ): bool {
 		$post_id = absint( $post_id );
 
 		if ( ! $post_id ) {
 			$post_id = get_the_ID();
 		}
 
-		$sticky_post_types = Helpers::get_sticky_post_types();
+		$stickify_post_types = Helpers::get_stickify_post_types();
 		$post_type         = get_post_type( $post_id );
 
-		if ( ! in_array( $post_type, $sticky_post_types, true ) ) {
+		if ( ! in_array( $post_type, $stickify_post_types, true ) ) {
 			return $is_sticky;
 		}
 
-		$is_custom_sticky = (bool) get_post_meta( $post_id, self::STICKY_META_KEY, true );
+		$is_custom_sticky = (bool) get_post_meta( $post_id, self::STICKIFY_META_KEY, true );
 
 		if ( 'post' === $post_type && ! $is_custom_sticky ) {
 			return $is_sticky;
@@ -421,9 +423,9 @@ class Register {
 			return false;
 		}
 
-		$sticky_start = absint( get_post_meta( $post_id, self::STICKY_START_META_KEY, true ) );
-		$sticky_until = absint( get_post_meta( $post_id, self::STICKY_UNTIL_META_KEY, true ) );
+		$stickify_start = absint( get_post_meta( $post_id, self::STICKIFY_START_META_KEY, true ) );
+		$stickify_until = absint( get_post_meta( $post_id, self::STICKIFY_UNTIL_META_KEY, true ) );
 
-		return 'active' === self::get_sticky_window_status( $sticky_start, $sticky_until );
+		return 'active' === self::get_stickify_window_status( $stickify_start, $stickify_until );
 	}
 }

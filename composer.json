@@ -1,6 +1,6 @@
 {
-    "name": "rareview/sticky-post-types",
-    "description": "Sticky Post Types WordPress plugin.",
+    "name": "rareview/stickify",
+    "description": "Stickify WordPress plugin.",
     "version": "1.0.0",
     "authors": [
         {
@@ -10,8 +10,8 @@
     ],
     "autoload": {
         "psr-4": {
-            "StickyPostTypes\\": "",
-            "StickyPostTypes\\Inc\\": "includes/"
+            "Stickify\\": "",
+            "Stickify\\Inc\\": "includes/"
         }
     },
     "config": {

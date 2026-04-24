@@ -4,19 +4,19 @@
  *
  * @author Rareview <hello@rareview.com>
  *
- * @package StickyPostTypes
+ * @package Stickify
  */
 
-namespace StickyPostTypes\Inc;
+namespace Stickify\Inc;
 
-use StickyPostTypes\Inc\Register;
+use Stickify\Inc\Register;
 
 /**
  * Class Registry
  */
 class Helpers {
 
-	const STICKY_CACHE_KEY = 'sticky_post_type';
+	const STICKIFY_CACHE_KEY = 'stickify_post_type';
 
 	/**
 	 * Plugin assets manifest.
@@ -79,7 +79,7 @@ class Helpers {
 	 * @return string Asset url.
 	 */
 	public static function asset_url( $file ) {
-		return plugins_url( 'dist/' . self::asset_name( $file ), dirname( __DIR__ ) . '/sticky-post-types.php' );
+		return plugins_url( 'dist/' . self::asset_name( $file ), dirname( __DIR__ ) . '/stickify.php' );
 	}
 
 	/**
@@ -87,8 +87,8 @@ class Helpers {
 	 *
 	 * @return array
 	 */
-	public static function get_sticky_post_types() {
-		return (array) get_option( 'sticky_post_types_post_types', [] );
+	public static function get_stickify_post_types() {
+		return (array) get_option( 'stickify_post_types', [] );
 	}
 
 	/**
@@ -96,8 +96,8 @@ class Helpers {
 	 *
 	 * @return int
 	 */
-	public static function get_sticky_cache_length(): int {
-		$cache_length = absint( get_option( 'sticky_post_types_cache_length', 15 ) );
+	public static function get_stickify_cache_length(): int {
+		$cache_length = absint( get_option( 'stickify_cache_length', 15 ) );
 
 		return max( 1, $cache_length );
 	}
@@ -109,14 +109,14 @@ class Helpers {
 	 *
 	 * @return array
 	 */
-	public static function get_sticky_posts_by_type( string $post_type ): array {
+	public static function get_stickify_posts_by_type( string $post_type ): array {
 		if ( empty( $post_type ) ) {
 			return [];
 		}
 
-		$sticky_post_ids = get_transient( self::STICKY_CACHE_KEY . '-' . $post_type );
+		$stickify_post_ids = get_transient( self::STICKIFY_CACHE_KEY . '-' . $post_type );
 
-		if ( false === $sticky_post_ids ) {
+		if ( false === $stickify_post_ids ) {
 			$current_time = time();
 
 			$args = [
@@ -124,13 +124,15 @@ class Helpers {
 				'post_status'            => 'publish',
 				'posts_per_page'         => -1,
 				'fields'                 => 'ids',
+				'stickify_post_types'    => false,
+				'ignore_stickify_posts'  => true,
 				'no_found_rows'          => true,
 				'update_post_meta_cache' => false,
 				'update_post_term_cache' => false,
 				'meta_query'             => [ // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 					'relation' => 'AND',
 					[
-						'key'     => Register::STICKY_META_KEY,
+						'key'     => Register::STICKIFY_META_KEY,
 						'value'   => '1',
 						'compare' => '=',
 						'type'    => 'NUMERIC',
@@ -138,22 +140,22 @@ class Helpers {
 					[
 						'relation' => 'OR',
 						[
-							'key'     => Register::STICKY_START_META_KEY,
+							'key'     => Register::STICKIFY_START_META_KEY,
 							'compare' => 'NOT EXISTS',
 						],
 						[
-							'key'     => Register::STICKY_START_META_KEY,
+							'key'     => Register::STICKIFY_START_META_KEY,
 							'value'   => '',
 							'compare' => '=',
 						],
 						[
-							'key'     => Register::STICKY_START_META_KEY,
+							'key'     => Register::STICKIFY_START_META_KEY,
 							'value'   => 0,
 							'compare' => '=',
 							'type'    => 'NUMERIC',
 						],
 						[
-							'key'     => Register::STICKY_START_META_KEY,
+							'key'     => Register::STICKIFY_START_META_KEY,
 							'value'   => $current_time,
 							'compare' => '<=',
 							'type'    => 'NUMERIC',
@@ -162,22 +164,22 @@ class Helpers {
 					[
 						'relation' => 'OR',
 						[
-							'key'     => Register::STICKY_UNTIL_META_KEY,
+							'key'     => Register::STICKIFY_UNTIL_META_KEY,
 							'compare' => 'NOT EXISTS',
 						],
 						[
-							'key'     => Register::STICKY_UNTIL_META_KEY,
+							'key'     => Register::STICKIFY_UNTIL_META_KEY,
 							'value'   => '',
 							'compare' => '=',
 						],
 						[
-							'key'     => Register::STICKY_UNTIL_META_KEY,
+							'key'     => Register::STICKIFY_UNTIL_META_KEY,
 							'value'   => 0,
 							'compare' => '=',
 							'type'    => 'NUMERIC',
 						],
 						[
-							'key'     => Register::STICKY_UNTIL_META_KEY,
+							'key'     => Register::STICKIFY_UNTIL_META_KEY,
 							'value'   => $current_time,
 							'compare' => '>',
 							'type'    => 'NUMERIC',
@@ -186,27 +188,27 @@ class Helpers {
 				],
 			];
 
-			$sticky_post_ids = get_posts( $args );
+			$stickify_post_ids = get_posts( $args );
 
-			set_transient( self::STICKY_CACHE_KEY . '-' . $post_type, $sticky_post_ids, MINUTE_IN_SECONDS * self::get_sticky_cache_length() );
+			set_transient( self::STICKIFY_CACHE_KEY . '-' . $post_type, $stickify_post_ids, MINUTE_IN_SECONDS * self::get_stickify_cache_length() );
 		}
 
-		return array_map( 'absint', (array) $sticky_post_ids );
+		return array_map( 'absint', (array) $stickify_post_ids );
 	}
 
 	/**
-	 * Delete sticky posts cache for a post type.
+	 * Delete stickify posts cache for a post type.
 	 *
 	 * @param string $post_type Post type to clear cache for.
 	 *
 	 * @return void
 	 */
-	public static function delete_sticky_posts_cache_by_type( string $post_type ): void {
+	public static function delete_stickify_cache_by_type( string $post_type ): void {
 		if ( empty( $post_type ) ) {
 			return;
 		}
 
-		delete_transient( self::STICKY_CACHE_KEY . '-' . $post_type );
+		delete_transient( self::STICKIFY_CACHE_KEY . '-' . $post_type );
 	}
 
 	/**

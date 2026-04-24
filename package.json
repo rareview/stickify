@@ -1,5 +1,5 @@
 {
-  "name": "sticky-post-types",
+  "name": "stickify",
   "version": "1.0.0",
   "description": "Make any post type sticky",
   "engineStrict": true,

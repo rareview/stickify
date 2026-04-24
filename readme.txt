@@ -1,4 +1,4 @@
-=== Sticky Post Types ===
+=== Stickify ===
 
 Contributors: rareview
 Tags:

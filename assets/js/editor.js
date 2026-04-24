@@ -5,15 +5,15 @@
  *
  * @author Rareview <hello@rareview.com>
  *
- * @package StickyPostTypes
+ * @package Stickify
  */
 
-import StickyPostTypesSidebar from './components/StickyPostTypesSidebar';
+import StickifySidebar from './components/StickifySidebar';
 
 const { registerPlugin } = wp.plugins;
 
-registerPlugin('rv-sticky-post-types-sidebar', {
+registerPlugin('rv-stickify-sidebar', {
 	render() {
-		return <StickyPostTypesSidebar />;
+		return <StickifySidebar />;
 	},
 });

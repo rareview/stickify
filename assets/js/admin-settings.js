@@ -6,10 +6,10 @@ const { render } = wp.element;
 /**
  * Internal dependencies
  */
-import StickyPostTypesSettingsApp from './components/StickyPostTypesSettingsApp';
+import StickifySettingsApp from './components/StickifySettingsApp';
 
-const mountNode = document.getElementById('sticky-post-types-settings-app');
+const mountNode = document.getElementById('stickify-settings-app');
 
 if (mountNode) {
-	render(<StickyPostTypesSettingsApp />, mountNode);
+	render(<StickifySettingsApp />, mountNode);
 }

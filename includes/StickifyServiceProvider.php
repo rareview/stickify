@@ -1,19 +1,19 @@
 <?php
 /**
- * Sticky Post Types service provider.
+ * Stickify service provider.
  *
  * @author Rareview <hello@rareview.com>
  *
- * @package StickyPostTypes
+ * @package Stickify
  */
 
-namespace StickyPostTypes\Inc;
+namespace Stickify\Inc;
 
 /**
  *
  * Plugin service provider.
  */
-class StickyPostTypesServiceProvider {
+class StickifyServiceProvider {
 
 	/**
 	 * The plugin features that should be bootstrapped.

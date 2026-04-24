@@ -4,12 +4,12 @@
  *
  * @author Rareview <hello@rareview.com>
  *
- * @package StickyPostTypes
+ * @package Stickify
  */
 
-namespace StickyPostTypes\Inc;
+namespace Stickify\Inc;
 
-use StickyPostTypes\Inc\Helpers;
+use Stickify\Inc\Helpers;
 
 /**
  * Class Settings
@@ -29,18 +29,18 @@ class Settings {
 	 * @return void
 	 */
 	public function register_editor_assets() {
-		add_action( 'init', [ $this, 'sticky_post_types_register_settings' ] );
-		add_action( 'admin_menu', [ $this, 'sticky_post_types_admin_menu' ] );
+		add_action( 'init', [ $this, 'stickify_register_settings' ] );
+		add_action( 'admin_menu', [ $this, 'stickify_admin_menu' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_settings_assets' ] );
 		add_action(
-			'update_option_sticky_post_types_post_types',
-			[ $this, 'clear_sticky_post_type_caches_on_setting_update' ],
+			'update_option_stickify_post_types',
+			[ $this, 'clear_stickify_caches_on_setting_update' ],
 			10,
 			2
 		);
 		add_action(
-			'update_option_sticky_post_types_cache_length',
-			[ $this, 'clear_all_sticky_post_type_caches' ],
+			'update_option_stickify_cache_length',
+			[ $this, 'clear_all_stickify_caches' ],
 			10,
 			2
 		);
@@ -54,7 +54,7 @@ class Settings {
 	 * @return void
 	 */
 	public function enqueue_settings_assets( $hook_suffix ) {
-		if ( 'settings_page_sticky-post-types' !== $hook_suffix ) {
+		if ( 'settings_page_stickify' !== $hook_suffix ) {
 			return;
 		}
 
@@ -70,7 +70,7 @@ class Settings {
 
 		wp_localize_script(
 			Register::PREFIX . '-admin-settings-script',
-			'stickyPostTypesAdmin',
+			'stickifyAdmin',
 			[
 				'availablePostTypes' => $this->get_public_custom_post_types(),
 			]
@@ -80,13 +80,13 @@ class Settings {
 	/**
 	 * Register the sticky post types settings.
 	 */
-	public function sticky_post_types_register_settings() {
+	public function stickify_register_settings() {
 		register_setting(
-			'sticky_post_types_options_group',
-			'sticky_post_types_post_types',
+			'stickify_options_group',
+			'stickify_post_types',
 			[
 				'type'              => 'array',
-				'description'       => __( 'Array of post types to enable sticky functionality for.', 'sticky-post-types' ),
+				'description'       => __( 'Array of post types to enable sticky functionality for.', 'stickify' ),
 				'show_in_rest'      => [
 					'schema' => [
 						'type'  => 'array',
@@ -96,16 +96,16 @@ class Settings {
 					],
 				],
 				'default'           => [],
-				'sanitize_callback' => [ $this, 'sanitize_sticky_post_types_post_types' ],
+				'sanitize_callback' => [ $this, 'sanitize_stickify_post_types' ],
 			],
 		);
 
 		register_setting(
-			'sticky_post_types_options_group',
-			'sticky_post_types_cache_length',
+			'stickify_options_group',
+			'stickify_cache_length',
 			[
 				'type'              => 'integer',
-				'description'       => __( 'Sticky posts cache length in minutes.', 'sticky-post-types' ),
+				'description'       => __( 'Sticky posts cache length in minutes.', 'stickify' ),
 				'show_in_rest'      => [
 					'schema' => [
 						'type'    => 'integer',
@@ -114,7 +114,7 @@ class Settings {
 					],
 				],
 				'default'           => 15,
-				'sanitize_callback' => [ $this, 'sanitize_sticky_post_types_cache_length' ],
+				'sanitize_callback' => [ $this, 'sanitize_stickify_cache_length' ],
 			]
 		);
 	}
@@ -125,7 +125,7 @@ class Settings {
 	 * @param mixed $input The raw option value submitted for the setting.
 	 * @return array The sanitized array of allowed post type slugs.
 	 */
-	public function sanitize_sticky_post_types_post_types( $input ) {
+	public function sanitize_stickify_post_types( $input ) {
 		if ( ! is_array( $input ) ) {
 			return [];
 		}
@@ -149,31 +149,31 @@ class Settings {
 	 *
 	 * @return int
 	 */
-	public function sanitize_sticky_post_types_cache_length( $input ) {
+	public function sanitize_stickify_cache_length( $input ) {
 		return max( 1, absint( $input ) ?: 15 );
 	}
 
 	/**
 	 * Add admin menu item.
 	 */
-	public function sticky_post_types_admin_menu() {
+	public function stickify_admin_menu() {
 		add_options_page(
-			__( 'Sticky Post Types Settings', 'sticky-post-types' ),
-			__( 'Sticky Post Types', 'sticky-post-types' ),
+			__( 'Stickify Settings', 'stickify' ),
+			__( 'Stickify', 'stickify' ),
 			'manage_options',
-			'sticky-post-types',
-			[ $this, 'sticky_post_types_options_page' ]
+			'stickify',
+			[ $this, 'stickify_options_page' ]
 		);
 	}
 
 	/**
 	 * Setup the options page.
 	 */
-	public function sticky_post_types_options_page() {
+	public function stickify_options_page() {
 		?>
 		<div class="wrap">
-			<h1><?php esc_html_e( 'Sticky Custom Post Types Settings', 'sticky-post-types' ); ?></h1>
-			<div id="sticky-post-types-settings-app"></div>
+			<h1><?php esc_html_e( 'Stickify Settings', 'stickify' ); ?></h1>
+			<div id="stickify-settings-app"></div>
 			<noscript>
 				<?php $this->render_settings_form(); ?>
 			</noscript>
@@ -188,21 +188,21 @@ class Settings {
 	 */
 	protected function render_settings_form() {
 		$public_post_types = $this->get_public_custom_post_types();
-		$sticky_post_types = Helpers::get_sticky_post_types();
-		$cache_length      = Helpers::get_sticky_cache_length();
+		$stickify_post_types = Helpers::get_stickify_post_types();
+		$cache_length      = Helpers::get_stickify_cache_length();
 		?>
 		<form method="post" action="options.php">
 			<?php
-			settings_fields( 'sticky_post_types_options_group' );
-			do_settings_sections( 'sticky_post_types_options_group' );
+			settings_fields( 'stickify_options_group' );
+			do_settings_sections( 'stickify_options_group' );
 			?>
 			<table class="form-table">
 				<tr valign="top">
-					<th scope="row"><?php esc_html_e( 'Sticky Post Types', 'sticky-post-types' ); ?></th>
+					<th scope="row"><?php esc_html_e( 'Sticky Post Types', 'stickify' ); ?></th>
 					<td>
 						<?php foreach ( $public_post_types as $post_type => $label ) : ?>
 							<label>
-								<input type="checkbox" name="sticky_post_types_post_types[]" value="<?php echo esc_attr( $post_type ); ?>" <?php checked( in_array( $post_type, $sticky_post_types, true ) ); ?> />
+								<input type="checkbox" name="stickify_post_types[]" value="<?php echo esc_attr( $post_type ); ?>" <?php checked( in_array( $post_type, $stickify_post_types, true ) ); ?> />
 								<?php echo esc_html( $label ); ?>
 							</label><br>
 						<?php endforeach; ?>
@@ -210,21 +210,21 @@ class Settings {
 				</tr>
 				<tr valign="top">
 					<th scope="row">
-						<label for="sticky-post-types-cache-length"><?php esc_html_e( 'Cache Length', 'sticky-post-types' ); ?></label>
+						<label for="stickify-cache-length"><?php esc_html_e( 'Cache Length', 'stickify' ); ?></label>
 					</th>
 					<td>
 						<input
-							id="sticky-post-types-cache-length"
+							id="stickify-cache-length"
 							type="number"
 							min="1"
-							name="sticky_post_types_cache_length"
+							name="stickify_cache_length"
 							value="<?php echo esc_attr( $cache_length ); ?>"
 						/>
-						<p class="description"><?php esc_html_e( 'How long, in minutes, sticky query results should be cached.', 'sticky-post-types' ); ?></p>
+						<p class="description"><?php esc_html_e( 'How long, in minutes, sticky query results should be cached.', 'stickify' ); ?></p>
 					</td>
 				</tr>
 			</table>
-			<?php submit_button( __( 'Save Changes', 'sticky-post-types' ) ); ?>
+			<?php submit_button( __( 'Save Changes', 'stickify' ) ); ?>
 		</form>
 		<?php
 	}
@@ -262,14 +262,14 @@ class Settings {
 	 *
 	 * @return void
 	 */
-	public function clear_sticky_post_type_caches_on_setting_update( $old_value, $new_value ): void {
+	public function clear_stickify_caches_on_setting_update( $old_value, $new_value ): void {
 		$old_value = (array) $old_value;
 		$new_value = (array) $new_value;
 
 		$post_types = array_unique( array_merge( $old_value, $new_value ) );
 
 		foreach ( $post_types as $post_type ) {
-			Helpers::delete_sticky_posts_cache_by_type( $post_type );
+			Helpers::delete_stickify_cache_by_type( $post_type );
 		}
 	}
 
@@ -281,11 +281,11 @@ class Settings {
 	 *
 	 * @return void
 	 */
-	public function clear_all_sticky_post_type_caches( $old_value, $new_value ): void {
+	public function clear_all_stickify_caches( $old_value, $new_value ): void {
 		unset( $old_value, $new_value );
 
-		foreach ( Helpers::get_sticky_post_types() as $post_type ) {
-			Helpers::delete_sticky_posts_cache_by_type( $post_type );
+		foreach ( Helpers::get_stickify_post_types() as $post_type ) {
+			Helpers::delete_stickify_cache_by_type( $post_type );
 		}
 	}
 }
