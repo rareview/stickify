@@ -19,13 +19,6 @@ class Helpers {
 	const STICKIFY_CACHE_KEY = 'stickify_post_type';
 
 	/**
-	 * Plugin assets manifest.
-	 *
-	 * @var array
-	 */
-	protected static $manifest;
-
-	/**
 	 * Plugin version.
 	 *
 	 * @return string Template version.
@@ -35,51 +28,34 @@ class Helpers {
 	}
 
 	/**
-	 * Get the name of the asset file from the generated manifest file.
+	 * Gets the URL for a built asset in the dist directory.
 	 *
-	 * @param string $file Asset file to retrieve.
+	 * @param string $file Asset filename (e.g. 'editor.js').
 	 *
-	 * @return string Asset name.
+	 * @return string Asset URL.
 	 */
-	public static function asset_name( $file ) {
-		if ( ! static::$manifest ) {
-			$manifest_file = dirname( __DIR__ ) . '/dist/manifest.json';
-
-			if ( ! file_exists( $manifest_file ) || ! is_readable( $manifest_file ) ) {
-				static::$manifest = [];
-			} else {
-				if ( function_exists( 'wp_json_file_decode' ) ) {
-					$decoded_manifest = wp_json_file_decode( $manifest_file, [ 'associative' => true ] );
-					static::$manifest = is_array( $decoded_manifest ) ? $decoded_manifest : [];
-				} else {
-					$manifest_contents = file_get_contents( $manifest_file );
-
-					if ( false === $manifest_contents ) {
-						static::$manifest = [];
-					} else {
-						$decoded_manifest = json_decode( $manifest_contents, true );
-						static::$manifest = is_array( $decoded_manifest ) ? $decoded_manifest : [];
-					}
-				}
-			}
-		}
-
-		if ( ! isset( static::$manifest[ $file ] ) ) {
-			return $file;
-		}
-
-		return static::$manifest[ $file ];
+	public static function asset_url( string $file ): string {
+		return plugins_url( 'dist/' . $file, dirname( __DIR__ ) . '/stickify.php' );
 	}
 
 	/**
-	 * Gets the assets url, useful for defining asset source files.
+	 * Returns the generated asset data (dependencies + version) for a built entry point.
 	 *
-	 * @param string $file Asset file to retrieve.
+	 * @param string $name Entry point name without extension (e.g. 'editor', 'admin-settings').
 	 *
-	 * @return string Asset url.
+	 * @return array{dependencies: string[], version: string|false}
 	 */
-	public static function asset_url( $file ) {
-		return plugins_url( 'dist/' . self::asset_name( $file ), dirname( __DIR__ ) . '/stickify.php' );
+	public static function asset_data( string $name ): array {
+		$asset_file = dirname( __DIR__ ) . '/dist/' . $name . '.asset.php';
+
+		if ( ! file_exists( $asset_file ) ) {
+			return [
+				'dependencies' => [],
+				'version'      => false,
+			];
+		}
+
+		return require $asset_file;
 	}
 
 	/**

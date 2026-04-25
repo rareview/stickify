@@ -1,15 +1,15 @@
 /**
  * WordPress dependencies
  */
-const { render } = wp.element;
+import { createRoot } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import StickifySettingsApp from './components/StickifySettingsApp';
 
-const mountNode = document.getElementById('stickify-settings-app');
+const mountNode = document.getElementById( 'stickify-settings-app' );
 
-if (mountNode) {
-	render(<StickifySettingsApp />, mountNode);
+if ( mountNode ) {
+	createRoot( mountNode ).render( <StickifySettingsApp /> );
 }

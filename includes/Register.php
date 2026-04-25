@@ -39,15 +39,16 @@ class Register {
 	public function register_editor_assets() {
 		add_action( 'init', [ $this, 'register_meta' ] );
 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
-		add_action( 'updated_post_meta', [ $this, 'maybe_clear_stickify_cache_on_meta_change' ], 10, 4 );
-		add_action( 'added_post_meta', [ $this, 'maybe_clear_stickify_cache_on_meta_change' ], 10, 4 );
-		add_action( 'deleted_post_meta', [ $this, 'maybe_clear_stickify_cache_on_meta_change' ], 10, 4 );
+		add_action( 'updated_post_meta', [ $this, 'maybe_clear_stickify_cache_on_meta_change' ], 10, 3 );
+		add_action( 'added_post_meta', [ $this, 'maybe_clear_stickify_cache_on_meta_change' ], 10, 3 );
+		add_action( 'deleted_post_meta', [ $this, 'maybe_clear_stickify_cache_on_meta_change' ], 10, 3 );
 		add_action( 'save_post', [ $this, 'maybe_clear_stickify_cache_on_save' ], 10, 2 );
 		add_action( 'before_delete_post', [ $this, 'maybe_clear_stickify_cache_on_delete' ] );
 		add_action( 'pre_get_posts', [ $this, 'maybe_remove_posts_from_query' ] );
 
 		add_filter( 'plugin_action_links_' . plugin_basename( dirname( __DIR__ ) . '/stickify.php' ), [ $this, 'add_settings_link_to_plugin_actions' ] );
-		add_filter( 'query_loop_block_query_vars', [ $this, 'enable_stickify_for_query_loop_block' ], 10, 2 );
+		add_filter( 'query_loop_block_query_vars', [ $this, 'enable_stickify_for_query_loop_block' ] );
+		add_filter( 'found_posts', [ $this, 'adjust_stickify_found_posts' ], 10, 2 );
 		add_filter( 'the_posts', [ $this, 'maybe_prepend_stickify_posts' ], 10, 2 );
 		add_filter( 'is_sticky', [ $this, 'evaluate_stickify_status' ], 10, 2 );
 		add_filter( 'display_post_states', [ $this, 'maybe_add_stickify_post_state_labels' ], 10, 2 );
@@ -98,6 +99,59 @@ class Register {
 	}
 
 	/**
+	 * Get the current page number for a query.
+	 *
+	 * Some archive contexts populate `page` instead of `paged`, so we normalize
+	 * here before applying sticky pagination compensation.
+	 *
+	 * @param WP_Query $query The current query.
+	 *
+	 * @return int
+	 */
+	private static function get_query_page_number( WP_Query $query ): int {
+		$paged = max(
+			1,
+			(int) $query->get( 'paged' ),
+			(int) $query->get( 'page' )
+		);
+
+		return $paged;
+	}
+
+	/**
+	 * Get the effective page size for a query.
+	 *
+	 * Front-end archive queries do not always expose a normalized posts_per_page
+	 * value yet at the point where pre_get_posts runs, so we fall back to the
+	 * relevant WordPress settings.
+	 *
+	 * @param WP_Query $query The current query.
+	 *
+	 * @return int
+	 */
+	private static function get_query_posts_per_page( WP_Query $query ): int {
+		$posts_per_page = (int) $query->get( 'posts_per_page' );
+
+		if ( $posts_per_page > 0 ) {
+			return $posts_per_page;
+		}
+
+		$posts_per_archive_page = (int) $query->get( 'posts_per_archive_page' );
+
+		if ( $posts_per_archive_page > 0 ) {
+			return $posts_per_archive_page;
+		}
+
+		$showposts = (int) $query->get( 'showposts' );
+
+		if ( $showposts > 0 ) {
+			return $showposts;
+		}
+
+		return max( 1, (int) get_option( 'posts_per_page', 10 ) );
+	}
+
+	/**
 	 * Add settings link to plugin actions on the plugins page.
 	 *
 	 * @param array $actions Existing plugin action links.
@@ -118,11 +172,10 @@ class Register {
 	 * Enable sticky post type handling for Query Loop block queries.
 	 *
 	 * @param array $query Query vars for the block query.
-	 * @param mixed $block Parsed block context.
 	 *
 	 * @return array
 	 */
-	public function enable_stickify_for_query_loop_block( array $query, $block ): array {
+	public function enable_stickify_for_query_loop_block( array $query ): array {
 		$query['stickify_post_types']            = true;
 		$query['stickify_post_types_query_loop'] = true;
 
@@ -190,7 +243,8 @@ class Register {
 	 * @return void
 	 */
 	public function enqueue_editor_assets() {
-		wp_enqueue_script( self::PREFIX . '-editor-script', Helpers::asset_url( 'editor.js' ), [ 'wp-blocks', 'wp-dom-ready', 'wp-edit-post' ], Helpers::version(), true );
+		$asset = Helpers::asset_data( 'editor' );
+		wp_enqueue_script( self::PREFIX . '-editor-script', Helpers::asset_url( 'editor.js' ), $asset['dependencies'], $asset['version'], true );
 	}
 
 	/**
@@ -199,11 +253,10 @@ class Register {
 	 * @param int    $meta_id    Meta ID.
 	 * @param int    $post_id    Post ID.
 	 * @param string $meta_key   Meta key.
-	 * @param mixed  $meta_value Meta value.
 	 *
 	 * @return void
 	 */
-	public function maybe_clear_stickify_cache_on_meta_change( $meta_id, $post_id, $meta_key, $meta_value ): void {
+	public function maybe_clear_stickify_cache_on_meta_change( $meta_id, $post_id, $meta_key ): void {
 		if (
 			self::STICKIFY_META_KEY !== $meta_key &&
 			self::STICKIFY_START_META_KEY !== $meta_key &&
@@ -278,12 +331,46 @@ class Register {
 
 		$post__not_in = $query->get( 'post__not_in', [] );
 		$post__not_in = array_map( 'absint', (array) $post__not_in );
-		$stickify_ids   = array_map( 'absint', $stickify_ids );
+		$stickify_ids = array_map( 'absint', $stickify_ids );
 
 		$query->set(
 			'post__not_in',
 			array_values( array_unique( array_merge( $post__not_in, $stickify_ids ) ) )
 		);
+
+		$paged = self::get_query_page_number( $query );
+
+		$posts_per_page = self::get_query_posts_per_page( $query );
+
+		if ( $posts_per_page > 0 ) {
+			$offset = ( ( $paged - 1 ) * $posts_per_page ) - count( $stickify_ids );
+
+			$query->set( 'offset', max( 0, $offset ) );
+		}
+	}
+
+	/**
+	 * Restore the original found post count after excluding sticky posts from the SQL query.
+	 *
+	 * @param int      $found_posts Found posts for the current query.
+	 * @param WP_Query $query       Current query object.
+	 *
+	 * @return int
+	 */
+	public function adjust_stickify_found_posts( $found_posts, $query ) {
+		$post_type = self::get_stickify_query_post_type( $query );
+
+		if ( ! $post_type || $query->is_singular() || $query->is_single() || $query->is_search() ) {
+			return $found_posts;
+		}
+
+		$stickify_ids = Helpers::get_stickify_posts_by_type( $post_type );
+
+		if ( empty( $stickify_ids ) ) {
+			return $found_posts;
+		}
+
+		return (int) $found_posts + count( $stickify_ids );
 	}
 
 	/**
@@ -301,33 +388,43 @@ class Register {
 			return $posts;
 		}
 
-		if ( $query->get( 'paged' ) > 1 ) {
-			return $posts;
-		}
-
 		$stickify_ids = Helpers::get_stickify_posts_by_type( $post_type );
 
 		if ( empty( $stickify_ids ) ) {
 			return $posts;
 		}
 
+		$paged          = self::get_query_page_number( $query );
+		$posts_per_page = self::get_query_posts_per_page( $query );
+
+		if ( $posts_per_page <= 0 ) {
+			return $posts;
+		}
+
+		$sticky_start_index = ( $paged - 1 ) * $posts_per_page;
+		$page_stickify_ids  = array_slice( $stickify_ids, $sticky_start_index, $posts_per_page );
+
+		if ( empty( $page_stickify_ids ) ) {
+			return $posts;
+		}
+
 		$stickify_posts = get_posts(
 			[
-				'post__in'         => $stickify_ids,
-				'post_type'        => $post_type,
-				'orderby'          => 'post__in',
-				'posts_per_page'   => count( $stickify_ids ),
+				'post__in'              => $page_stickify_ids,
+				'post_type'             => $post_type,
+				'orderby'               => 'post__in',
+				'posts_per_page'        => count( $page_stickify_ids ),
 				'stickify_post_types'   => false,
 				'ignore_stickify_posts' => true,
-				'suppress_filters' => false, // phpcs:ignore
+				'suppress_filters'      => false, // phpcs:ignore
 			]
 		);
 
 		$merged_posts = array_merge( $stickify_posts, $posts );
 
 		// Keep the original query page size after prepending stickify posts.
-		if ( count( $posts ) > 0 ) {
-			return array_slice( $merged_posts, 0, count( $posts ) );
+		if ( count( $merged_posts ) > $posts_per_page ) {
+			return array_slice( $merged_posts, 0, $posts_per_page );
 		}
 
 		return $merged_posts;
@@ -407,7 +504,7 @@ class Register {
 		}
 
 		$stickify_post_types = Helpers::get_stickify_post_types();
-		$post_type         = get_post_type( $post_id );
+		$post_type           = get_post_type( $post_id );
 
 		if ( ! in_array( $post_type, $stickify_post_types, true ) ) {
 			return $is_sticky;

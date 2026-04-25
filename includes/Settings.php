@@ -58,11 +58,12 @@ class Settings {
 			return;
 		}
 
+		$asset = Helpers::asset_data( 'admin-settings' );
 		wp_enqueue_script(
 			Register::PREFIX . '-admin-settings-script',
 			Helpers::asset_url( 'admin-settings.js' ),
-			[ 'wp-api-fetch', 'wp-components', 'wp-element', 'wp-i18n' ],
-			Helpers::version(),
+			$asset['dependencies'],
+			$asset['version'],
 			true
 		);
 
@@ -187,9 +188,9 @@ class Settings {
 	 * @return void
 	 */
 	protected function render_settings_form() {
-		$public_post_types = $this->get_public_custom_post_types();
+		$public_post_types   = $this->get_public_custom_post_types();
 		$stickify_post_types = Helpers::get_stickify_post_types();
-		$cache_length      = Helpers::get_stickify_cache_length();
+		$cache_length        = Helpers::get_stickify_cache_length();
 		?>
 		<form method="post" action="options.php">
 			<?php

@@ -141,7 +141,7 @@ class Rest {
 
 				if ( is_array( $core_sticky_ids ) ) {
 					$core_sticky_ids = array_map( 'absint', $core_sticky_ids );
-					$post_ids       = array_unique(
+					$post_ids        = array_unique(
 						array_merge(
 							$post_ids,
 							$core_sticky_ids,

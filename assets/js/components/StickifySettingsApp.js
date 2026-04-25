@@ -2,8 +2,8 @@
  * WordPress dependencies
  */
 /* global stickifyAdmin */
-const apiFetch = wp.apiFetch;
-const {
+import apiFetch from '@wordpress/api-fetch';
+import {
 	Button,
 	Card,
 	CardBody,
@@ -11,9 +11,9 @@ const {
 	Notice,
 	Spinner,
 	TextControl,
-} = wp.components;
-const { useEffect, useMemo, useState } = wp.element;
-const { __ } = wp.i18n;
+} from '@wordpress/components';
+import { useEffect, useMemo, useState } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 
 const SETTINGS_REST_PATH = '/wp/v2/settings';
 const SETTINGS_OPTION_KEY = 'stickify_post_types';
@@ -23,205 +23,209 @@ const STICKIFY_POSTS_REST_PATH = '/stickify/v1/sticky-posts';
 const CLEAR_STICKIFY_POSTS_REST_PATH = '/stickify/v1/sticky-posts/clear';
 
 const StickifySettingsApp = () => {
-	const [isLoading, setIsLoading] = useState(true);
-	const [isSaving, setIsSaving] = useState(false);
-	const [isClearingCache, setIsClearingCache] = useState(false);
-	const [isLoadingStickifyPosts, setIsLoadingStickifyPosts] = useState(false);
-	const [isClearingStickifyPosts, setIsClearingStickifyPosts] = useState(false);
-	const [errorMessage, setErrorMessage] = useState('');
-	const [successMessage, setSuccessMessage] = useState('');
-	const [selectedPostTypes, setSelectedPostTypes] = useState([]);
-	const [cacheLength, setCacheLength] = useState('15');
-	const [stickyPostsByType, setStickifyPostsByType] = useState({});
-	const [selectedStickyIdsByType, setSelectedStickyIdsByType] = useState({});
+	const [ isLoading, setIsLoading ] = useState( true );
+	const [ isSaving, setIsSaving ] = useState( false );
+	const [ isClearingCache, setIsClearingCache ] = useState( false );
+	const [ isLoadingStickifyPosts, setIsLoadingStickifyPosts ] =
+		useState( false );
+	const [ isClearingStickifyPosts, setIsClearingStickifyPosts ] =
+		useState( false );
+	const [ errorMessage, setErrorMessage ] = useState( '' );
+	const [ successMessage, setSuccessMessage ] = useState( '' );
+	const [ selectedPostTypes, setSelectedPostTypes ] = useState( [] );
+	const [ cacheLength, setCacheLength ] = useState( '15' );
+	const [ stickyPostsByType, setStickifyPostsByType ] = useState( {} );
+	const [ selectedStickyIdsByType, setSelectedStickyIdsByType ] = useState(
+		{}
+	);
 
-	const availablePostTypes = useMemo(() => {
-		return Object.entries(
-			stickifyAdmin?.availablePostTypes || {}
-		).map(([slug, label]) => ({
-			slug,
-			label,
-		}));
-	}, []);
+	const availablePostTypes = useMemo( () => {
+		return Object.entries( stickifyAdmin?.availablePostTypes || {} ).map(
+			( [ slug, label ] ) => ( {
+				slug,
+				label,
+			} )
+		);
+	}, [] );
 
-	useEffect(() => {
+	useEffect( () => {
 		const fetchInitialData = async () => {
 			try {
-				const response = await apiFetch({ path: SETTINGS_REST_PATH });
-				const postTypes = Array.isArray(response?.[SETTINGS_OPTION_KEY])
-					? response[SETTINGS_OPTION_KEY]
+				const response = await apiFetch( { path: SETTINGS_REST_PATH } );
+				const postTypes = Array.isArray(
+					response?.[ SETTINGS_OPTION_KEY ]
+				)
+					? response[ SETTINGS_OPTION_KEY ]
 					: [];
 				const resolvedCacheLength = Number.parseInt(
-					response?.[CACHE_LENGTH_OPTION_KEY],
+					response?.[ CACHE_LENGTH_OPTION_KEY ],
 					10
 				);
 
-				setSelectedPostTypes(postTypes);
+				setSelectedPostTypes( postTypes );
 				setCacheLength(
-					Number.isNaN(resolvedCacheLength)
+					Number.isNaN( resolvedCacheLength )
 						? '15'
-						: String(Math.max(1, resolvedCacheLength))
+						: String( Math.max( 1, resolvedCacheLength ) )
 				);
-			} catch (error) {
+			} catch ( error ) {
 				setErrorMessage(
 					error?.message ||
-						__('Unable to load settings.', 'stickify')
+						__( 'Unable to load settings.', 'stickify' )
 				);
 			} finally {
-				setIsLoading(false);
+				setIsLoading( false );
 			}
 		};
 
 		fetchInitialData();
-	}, []);
+	}, [] );
 
-	useEffect(() => {
-		if (isLoading) {
+	useEffect( () => {
+		if ( isLoading ) {
 			return;
 		}
 
 		const fetchStickifyPosts = async () => {
-			setIsLoadingStickifyPosts(true);
+			setIsLoadingStickifyPosts( true );
 
 			try {
-				const response = await apiFetch({
+				const response = await apiFetch( {
 					path: STICKIFY_POSTS_REST_PATH,
-				});
-				setStickifyPostsByType(response || {});
-				setSelectedStickyIdsByType({});
-			} catch (error) {
+				} );
+				setStickifyPostsByType( response || {} );
+				setSelectedStickyIdsByType( {} );
+			} catch ( error ) {
 				setErrorMessage(
 					error?.message ||
-						__('Unable to load sticky posts.', 'stickify')
+						__( 'Unable to load sticky posts.', 'stickify' )
 				);
 			} finally {
-				setIsLoadingStickifyPosts(false);
+				setIsLoadingStickifyPosts( false );
 			}
 		};
 
 		fetchStickifyPosts();
-	}, [isLoading]);
+	}, [ isLoading ] );
 
 	const fetchStickifyPosts = async () => {
-		setIsLoadingStickifyPosts(true);
+		setIsLoadingStickifyPosts( true );
 
 		try {
-			const response = await apiFetch({ path: STICKIFY_POSTS_REST_PATH });
-			setStickifyPostsByType(response || {});
-			setSelectedStickyIdsByType({});
-		} catch (error) {
+			const response = await apiFetch( {
+				path: STICKIFY_POSTS_REST_PATH,
+			} );
+			setStickifyPostsByType( response || {} );
+			setSelectedStickyIdsByType( {} );
+		} catch ( error ) {
 			setErrorMessage(
 				error?.message ||
-					__('Unable to load sticky posts.', 'stickify')
+					__( 'Unable to load sticky posts.', 'stickify' )
 			);
 		} finally {
-			setIsLoadingStickifyPosts(false);
+			setIsLoadingStickifyPosts( false );
 		}
 	};
 
-	const togglePostType = (slug, isChecked) => {
-		setSelectedPostTypes((current) => {
-			if (isChecked) {
-				return [...new Set([...current, slug])];
+	const togglePostType = ( slug, isChecked ) => {
+		setSelectedPostTypes( ( current ) => {
+			if ( isChecked ) {
+				return [ ...new Set( [ ...current, slug ] ) ];
 			}
 
-			return current.filter((postType) => postType !== slug);
-		});
+			return current.filter( ( postType ) => postType !== slug );
+		} );
 	};
 
-	const toggleStickySelection = (postType, postId, isChecked) => {
-		setSelectedStickyIdsByType((current) => {
-			const existing = current[postType] || [];
+	const toggleStickySelection = ( postType, postId, isChecked ) => {
+		setSelectedStickyIdsByType( ( current ) => {
+			const existing = current[ postType ] || [];
 
-			if (isChecked) {
+			if ( isChecked ) {
 				return {
 					...current,
-					[postType]: [...new Set([...existing, postId])],
+					[ postType ]: [ ...new Set( [ ...existing, postId ] ) ],
 				};
 			}
 
 			return {
 				...current,
-				[postType]: existing.filter((id) => id !== postId),
+				[ postType ]: existing.filter( ( id ) => id !== postId ),
 			};
-		});
+		} );
 	};
 
 	const saveSettings = async () => {
-		setIsSaving(true);
-		setErrorMessage('');
-		setSuccessMessage('');
+		setIsSaving( true );
+		setErrorMessage( '' );
+		setSuccessMessage( '' );
 
 		const normalizedCacheLength = Math.max(
 			1,
-			Number.parseInt(cacheLength, 10) || 15
+			Number.parseInt( cacheLength, 10 ) || 15
 		);
 
 		try {
-			await apiFetch({
+			await apiFetch( {
 				path: SETTINGS_REST_PATH,
 				method: 'POST',
 				data: {
-					[SETTINGS_OPTION_KEY]: selectedPostTypes,
-					[CACHE_LENGTH_OPTION_KEY]: normalizedCacheLength,
+					[ SETTINGS_OPTION_KEY ]: selectedPostTypes,
+					[ CACHE_LENGTH_OPTION_KEY ]: normalizedCacheLength,
 				},
-			});
+			} );
 
-			setCacheLength(String(normalizedCacheLength));
-			setSuccessMessage(__('Settings saved.', 'stickify'));
+			setCacheLength( String( normalizedCacheLength ) );
+			setSuccessMessage( __( 'Settings saved.', 'stickify' ) );
 			await fetchStickifyPosts();
-		} catch (error) {
+		} catch ( error ) {
 			setErrorMessage(
-				error?.message ||
-					__('Unable to save settings.', 'stickify')
+				error?.message || __( 'Unable to save settings.', 'stickify' )
 			);
 		} finally {
-			setIsSaving(false);
+			setIsSaving( false );
 		}
 	};
 
 	const clearCache = async () => {
-		setIsClearingCache(true);
-		setErrorMessage('');
-		setSuccessMessage('');
+		setIsClearingCache( true );
+		setErrorMessage( '' );
+		setSuccessMessage( '' );
 
 		try {
-			const response = await apiFetch({
+			const response = await apiFetch( {
 				path: CLEAR_CACHE_REST_PATH,
 				method: 'POST',
-			});
+			} );
 
 			let cacheMessage = __(
 				'No sticky caches needed clearing.',
 				'stickify'
 			);
 
-			if (response?.cleared > 0) {
-				cacheMessage = __(
-					'Sticky caches cleared.',
-					'stickify'
-				);
+			if ( response?.cleared > 0 ) {
+				cacheMessage = __( 'Sticky caches cleared.', 'stickify' );
 			}
 
-			setSuccessMessage(cacheMessage);
-		} catch (error) {
+			setSuccessMessage( cacheMessage );
+		} catch ( error ) {
 			setErrorMessage(
 				error?.message ||
-					__('Unable to clear sticky caches.', 'stickify')
+					__( 'Unable to clear sticky caches.', 'stickify' )
 			);
 		} finally {
-			setIsClearingCache(false);
+			setIsClearingCache( false );
 		}
 	};
 
-	const clearStickifyPosts = async (postIds) => {
-		if (!Array.isArray(postIds) || postIds.length === 0) {
+	const clearStickifyPosts = async ( postIds ) => {
+		if ( ! Array.isArray( postIds ) || postIds.length === 0 ) {
 			return;
 		}
 
-		setIsClearingStickifyPosts(true);
-		setErrorMessage('');
-		setSuccessMessage('');
+		setIsClearingStickifyPosts( true );
+		setErrorMessage( '' );
+		setSuccessMessage( '' );
 
 		const clearStickifyPayload = {
 			// eslint-disable-next-line camelcase
@@ -229,73 +233,73 @@ const StickifySettingsApp = () => {
 		};
 
 		try {
-			const response = await apiFetch({
+			const response = await apiFetch( {
 				path: CLEAR_STICKIFY_POSTS_REST_PATH,
 				method: 'POST',
 				data: clearStickifyPayload,
-			});
+			} );
 
 			let clearMessage = __(
 				'No sticky posts were cleared.',
 				'stickify'
 			);
 
-			if (response?.cleared > 0) {
+			if ( response?.cleared > 0 ) {
 				clearMessage = __(
 					'Sticky behavior removed from selected posts.',
 					'stickify'
 				);
 			}
 
-			setSuccessMessage(clearMessage);
+			setSuccessMessage( clearMessage );
 			await fetchStickifyPosts();
-		} catch (error) {
+		} catch ( error ) {
 			setErrorMessage(
 				error?.message ||
-					__('Unable to clear sticky behavior.', 'stickify')
+					__( 'Unable to clear sticky behavior.', 'stickify' )
 			);
 		} finally {
-			setIsClearingStickifyPosts(false);
+			setIsClearingStickifyPosts( false );
 		}
 	};
 
-	const clearSingleStickifyPost = async (postId) => {
-		await clearStickifyPosts([postId]);
+	const clearSingleStickifyPost = async ( postId ) => {
+		await clearStickifyPosts( [ postId ] );
 	};
 
-	const clearSelectedStickifyPosts = async (postType) => {
-		const selectedIds = selectedStickyIdsByType[postType] || [];
-		await clearStickifyPosts(selectedIds);
+	const clearSelectedStickifyPosts = async ( postType ) => {
+		const selectedIds = selectedStickyIdsByType[ postType ] || [];
+		await clearStickifyPosts( selectedIds );
 	};
 
-	const formatTimestamp = (timestamp) => {
-		if (!timestamp) {
-			return __('Not set', 'stickify');
+	const formatTimestamp = ( timestamp ) => {
+		if ( ! timestamp ) {
+			return __( 'Not set', 'stickify' );
 		}
 
-		return new Date(timestamp * 1000).toLocaleString();
+		return new Date( timestamp * 1000 ).toLocaleString();
 	};
 
-	const getStickyDateLabels = (post) => {
+	const getStickyDateLabels = ( post ) => {
 		const labels = [];
-		const now = Math.floor(Date.now() / 1000);
+		const now = Math.floor( Date.now() / 1000 );
 
-		if (post?.stickyStart > now) {
-			labels.push(__('Sticky (Upcoming)', 'stickify'));
+		if ( post?.stickyStart > now ) {
+			labels.push( __( 'Sticky (Upcoming)', 'stickify' ) );
 		}
 
-		if (post?.stickyUntil > 0 && post?.stickyUntil <= now) {
-			labels.push(__('Sticky (Expired)', 'stickify'));
+		if ( post?.stickyUntil > 0 && post?.stickyUntil <= now ) {
+			labels.push( __( 'Sticky (Expired)', 'stickify' ) );
 		}
 
 		return labels;
 	};
 
 	const clearSelectedLabel = isClearingStickifyPosts
-		? __('Clearing…', 'stickify')
-		: __('Clear Selected', 'stickify');
+		? __( 'Clearing…', 'stickify' )
+		: __( 'Clear Selected', 'stickify' );
 
-	if (isLoading) {
+	if ( isLoading ) {
 		return (
 			<Card>
 				<CardBody>
@@ -305,14 +309,14 @@ const StickifySettingsApp = () => {
 		);
 	}
 
-	if (availablePostTypes.length === 0) {
+	if ( availablePostTypes.length === 0 ) {
 		return (
 			<Card>
 				<CardBody>
-					{__(
+					{ __(
 						'No public custom post types were found on this site.',
 						'stickify'
-					)}
+					) }
 				</CardBody>
 			</Card>
 		);
@@ -321,107 +325,107 @@ const StickifySettingsApp = () => {
 	return (
 		<Card>
 			<CardBody>
-				{errorMessage && (
-					<Notice status="error" isDismissible={false}>
-						{errorMessage}
+				{ errorMessage && (
+					<Notice status="error" isDismissible={ false }>
+						{ errorMessage }
 					</Notice>
-				)}
-				{successMessage && (
-					<Notice status="success" isDismissible={false}>
-						{successMessage}
+				) }
+				{ successMessage && (
+					<Notice status="success" isDismissible={ false }>
+						{ successMessage }
 					</Notice>
-				)}
+				) }
 
 				<p>
-					{__(
+					{ __(
 						'Enable sticky behavior for these post types:',
 						'stickify'
-					)}
+					) }
 				</p>
 
-				{availablePostTypes.map(({ slug, label }) => (
+				{ availablePostTypes.map( ( { slug, label } ) => (
 					<CheckboxControl
-						key={slug}
-						label={label}
-						checked={selectedPostTypes.includes(slug)}
-						onChange={(isChecked) =>
-							togglePostType(slug, isChecked)
+						key={ slug }
+						label={ label }
+						checked={ selectedPostTypes.includes( slug ) }
+						onChange={ ( isChecked ) =>
+							togglePostType( slug, isChecked )
 						}
 					/>
-				))}
+				) ) }
 
 				<TextControl
 					type="number"
 					min="1"
-					label={__('Cache length in minutes', 'stickify')}
-					help={__(
+					label={ __( 'Cache length in minutes', 'stickify' ) }
+					help={ __(
 						'How long sticky query results should be cached.',
 						'stickify'
-					)}
-					value={cacheLength}
-					onChange={(value) => setCacheLength(value)}
+					) }
+					value={ cacheLength }
+					onChange={ ( value ) => setCacheLength( value ) }
 				/>
 
 				<Button
 					variant="primary"
-					onClick={saveSettings}
+					onClick={ saveSettings }
 					disabled={
 						isSaving || isClearingCache || isClearingStickifyPosts
 					}
-					style={{ marginRight: '1em' }}
+					style={ { marginRight: '1em' } }
 				>
-					{isSaving
-						? __('Saving…', 'stickify')
-						: __('Save Changes', 'stickify')}
+					{ isSaving
+						? __( 'Saving…', 'stickify' )
+						: __( 'Save Changes', 'stickify' ) }
 				</Button>
 
 				<Button
 					variant="secondary"
-					onClick={clearCache}
+					onClick={ clearCache }
 					disabled={
 						isSaving || isClearingCache || isClearingStickifyPosts
 					}
 				>
-					{isClearingCache
-						? __('Clearing cache…', 'stickify')
-						: __('Clear Cache Now', 'stickify')}
+					{ isClearingCache
+						? __( 'Clearing cache…', 'stickify' )
+						: __( 'Clear Cache Now', 'stickify' ) }
 				</Button>
 
-				<hr style={{ margin: '24px 0' }} />
-				<h2>{__('Sticky Posts', 'stickify')}</h2>
+				<hr style={ { margin: '24px 0' } } />
+				<h2>{ __( 'Sticky Posts', 'stickify' ) }</h2>
 
-				{isLoadingStickifyPosts && <Spinner />}
+				{ isLoadingStickifyPosts && <Spinner /> }
 
-				{!isLoadingStickifyPosts &&
-					Object.entries(stickyPostsByType).map(
-						([postType, payload]) => {
-							const posts = Array.isArray(payload?.posts)
+				{ ! isLoadingStickifyPosts &&
+					Object.entries( stickyPostsByType ).map(
+						( [ postType, payload ] ) => {
+							const posts = Array.isArray( payload?.posts )
 								? payload.posts
 								: [];
 							const selectedIds =
-								selectedStickyIdsByType[postType] || [];
+								selectedStickyIdsByType[ postType ] || [];
 
 							return (
 								<div
-									key={postType}
-									style={{ marginBottom: '20px' }}
+									key={ postType }
+									style={ { marginBottom: '20px' } }
 								>
-									<h3>{payload?.label || postType}</h3>
+									<h3>{ payload?.label || postType }</h3>
 
-									{posts.length === 0 && (
+									{ posts.length === 0 && (
 										<p>
-											{__(
+											{ __(
 												'No posts are currently marked sticky.',
 												'stickify'
-											)}
+											) }
 										</p>
-									)}
+									) }
 
-									{posts.length > 0 && (
+									{ posts.length > 0 && (
 										<div>
 											<Button
 												variant="secondary"
-												onClick={() =>
+												onClick={ () =>
 													clearSelectedStickifyPosts(
 														postType
 													)
@@ -432,32 +436,36 @@ const StickifySettingsApp = () => {
 													isSaving ||
 													isClearingCache
 												}
-												style={{ marginBottom: '10px' }}
+												style={ {
+													marginBottom: '10px',
+												} }
 											>
-												{clearSelectedLabel}
+												{ clearSelectedLabel }
 											</Button>
 
-											{posts.map((post) => {
+											{ posts.map( ( post ) => {
 												const dateLabels =
-													getStickyDateLabels(post);
+													getStickyDateLabels( post );
 
 												return (
 													<div
-														key={post.id}
-														style={{
+														key={ post.id }
+														style={ {
 															display: 'flex',
 															alignItems:
 																'center',
 															gap: '10px',
 															marginBottom: '8px',
-														}}
+														} }
 													>
 														<input
 															type="checkbox"
-															checked={selectedIds.includes(
+															checked={ selectedIds.includes(
 																post.id
-															)}
-															onChange={(event) =>
+															) }
+															onChange={ (
+																event
+															) =>
 																toggleStickySelection(
 																	postType,
 																	post.id,
@@ -468,43 +476,45 @@ const StickifySettingsApp = () => {
 														/>
 
 														<div
-															style={{ flex: 1 }}
+															style={ {
+																flex: 1,
+															} }
 														>
 															<strong>
-																{post.title}
-															</strong>{' '}
-															({post.status})
-															{dateLabels.length >
+																{ post.title }
+															</strong>{ ' ' }
+															({ post.status })
+															{ dateLabels.length >
 																0 && (
 																<span>
-																	{' '}
+																	{ ' ' }
 																	[
-																	{dateLabels.join(
+																	{ dateLabels.join(
 																		', '
-																	)}
+																	) }
 																	]
 																</span>
-															)}
+															) }
 															<div>
-																{__(
+																{ __(
 																	'Start:',
 																	'stickify'
-																)}{' '}
-																{formatTimestamp(
+																) }{ ' ' }
+																{ formatTimestamp(
 																	post.stickyStart
-																)}
-																{' | '}
-																{__(
+																) }
+																{ ' | ' }
+																{ __(
 																	'Until:',
 																	'stickify'
-																)}{' '}
-																{formatTimestamp(
+																) }{ ' ' }
+																{ formatTimestamp(
 																	post.stickyUntil
-																)}
+																) }
 															</div>
 														</div>
 
-														{post.editLink && (
+														{ post.editLink && (
 															<a
 																href={
 																	post.editLink
@@ -512,16 +522,16 @@ const StickifySettingsApp = () => {
 																target="_blank"
 																rel="noreferrer"
 															>
-																{__(
+																{ __(
 																	'Edit',
 																	'stickify'
-																)}
+																) }
 															</a>
-														)}
+														) }
 
 														<Button
 															variant="secondary"
-															onClick={() =>
+															onClick={ () =>
 																clearSingleStickifyPost(
 																	post.id
 																)
@@ -532,20 +542,20 @@ const StickifySettingsApp = () => {
 																isClearingCache
 															}
 														>
-															{__(
+															{ __(
 																'Clear Sticky',
 																'stickify'
-															)}
+															) }
 														</Button>
 													</div>
 												);
-											})}
+											} ) }
 										</div>
-									)}
+									) }
 								</div>
 							);
 						}
-					)}
+					) }
 			</CardBody>
 		</Card>
 	);

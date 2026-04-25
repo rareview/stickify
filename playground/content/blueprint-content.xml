@@ -29,7 +29,7 @@
 		<wp:post_date>2025-05-20 10:00:00</wp:post_date>
 		<wp:post_type>recipe</wp:post_type>
 		<wp:status>publish</wp:status>
-		<content:encoded><![CDATA[Soft, chewy cookies loaded with semi-sweet chocolate chips and a slightly crisp edge. A timeless homemade treat that works for any occasion.]]></content:encoded>
+		<content:encoded><![CDATA[<!-- wp:paragraph --><p>Soft, chewy cookies loaded with semi-sweet chocolate chips and a slightly crisp edge. A timeless homemade treat that works for any occasion.</p><!-- /wp:paragraph -->]]></content:encoded>
 	</item>
 
 	<item>
@@ -39,7 +39,7 @@
 		<wp:post_date>2025-06-10 11:30:00</wp:post_date>
 		<wp:post_type>recipe</wp:post_type>
 		<wp:status>publish</wp:status>
-		<content:encoded><![CDATA[A moist and flavorful loaf made with ripe bananas, warm spices, and a tender crumb. Perfect for breakfast or an afternoon snack.]]></content:encoded>
+		<content:encoded><![CDATA[<!-- wp:paragraph --><p>A moist and flavorful loaf made with ripe bananas, warm spices, and a tender crumb. Perfect for breakfast or an afternoon snack.</p><!-- /wp:paragraph -->]]></content:encoded>
 	</item>
 
 	<item>
@@ -49,7 +49,7 @@
 		<wp:post_date>2025-07-25 09:15:00</wp:post_date>
 		<wp:post_type>recipe</wp:post_type>
 		<wp:status>publish</wp:status>
-		<content:encoded><![CDATA[Light and fluffy muffins bursting with fresh blueberries and topped with a subtle sugar crust for a touch of sweetness.]]></content:encoded>
+		<content:encoded><![CDATA[<!-- wp:paragraph --><p>Light and fluffy muffins bursting with fresh blueberries and topped with a subtle sugar crust for a touch of sweetness.</p><!-- /wp:paragraph -->]]></content:encoded>
 	</item>
 
 	<item>
@@ -59,7 +59,7 @@
 		<wp:post_date>2025-09-14 12:45:00</wp:post_date>
 		<wp:post_type>recipe</wp:post_type>
 		<wp:status>publish</wp:status>
-		<content:encoded><![CDATA[A classic apple pie with a flaky golden crust and a spiced apple filling featuring cinnamon, nutmeg, and a hint of lemon.]]></content:encoded>
+		<content:encoded><![CDATA[<!-- wp:paragraph --><p>A classic apple pie with a flaky golden crust and a spiced apple filling featuring cinnamon, nutmeg, and a hint of lemon.</p><!-- /wp:paragraph -->]]></content:encoded>
 	</item>
 
 	<item>
@@ -69,7 +69,7 @@
 		<wp:post_date>2025-10-30 14:00:00</wp:post_date>
 		<wp:post_type>recipe</wp:post_type>
 		<wp:status>publish</wp:status>
-		<content:encoded><![CDATA[A rich and warmly spiced bread made with pumpkin puree, perfect for fall with notes of cinnamon, clove, and nutmeg.]]></content:encoded>
+		<content:encoded><![CDATA[<!-- wp:paragraph --><p>A rich and warmly spiced bread made with pumpkin puree, perfect for fall with notes of cinnamon, clove, and nutmeg.</p><!-- /wp:paragraph -->]]></content:encoded>
 	</item>
 
 	<item>
@@ -79,7 +79,7 @@
 		<wp:post_date>2025-12-20 11:00:00</wp:post_date>
 		<wp:post_type>recipe</wp:post_type>
 		<wp:status>publish</wp:status>
-		<content:encoded><![CDATA[Soft, buttery rolls swirled with cinnamon sugar and finished with a smooth cream cheese glaze. Best served warm.]]></content:encoded>
+		<content:encoded><![CDATA[<!-- wp:paragraph --><p>Soft, buttery rolls swirled with cinnamon sugar and finished with a smooth cream cheese glaze. Best served warm.</p><!-- /wp:paragraph -->]]></content:encoded>
 	</item>
 
 	<!-- 📚 Books -->
@@ -91,7 +91,7 @@
 		<wp:post_date>2026-01-05 10:00:00</wp:post_date>
 		<wp:post_type>book</wp:post_type>
 		<wp:status>publish</wp:status>
-		<content:encoded><![CDATA[The first installment of The Lord of the Rings, following Frodo Baggins as he begins his journey to destroy the One Ring.]]></content:encoded>
+		<content:encoded><![CDATA[<!-- wp:paragraph --><p>The first installment of The Lord of the Rings, following Frodo Baggins as he begins his journey to destroy the One Ring.</p><!-- /wp:paragraph -->]]></content:encoded>
 	</item>
 
 	<item>
@@ -101,7 +101,7 @@
 		<wp:post_date>2026-01-28 12:20:00</wp:post_date>
 		<wp:post_type>book</wp:post_type>
 		<wp:status>publish</wp:status>
-		<content:encoded><![CDATA[A darkly satirical novel by Chuck Palahniuk about a man raised in a cult who becomes an unlikely celebrity.]]></content:encoded>
+		<content:encoded><![CDATA[<!-- wp:paragraph --><p>A darkly satirical novel by Chuck Palahniuk about a man raised in a cult who becomes an unlikely celebrity.</p><!-- /wp:paragraph -->]]></content:encoded>
 	</item>
 
 	<item>
@@ -111,7 +111,7 @@
 		<wp:post_date>2026-02-17 09:10:00</wp:post_date>
 		<wp:post_type>book</wp:post_type>
 		<wp:status>publish</wp:status>
-		<content:encoded><![CDATA[The first book in A Song of Ice and Fire, introducing the political intrigue and power struggles of the Seven Kingdoms.]]></content:encoded>
+		<content:encoded><![CDATA[<!-- wp:paragraph --><p>The first book in A Song of Ice and Fire, introducing the political intrigue and power struggles of the Seven Kingdoms.</p><!-- /wp:paragraph -->]]></content:encoded>
 	</item>
 
 	<item>
@@ -121,7 +121,7 @@
 		<wp:post_date>2026-03-05 11:45:00</wp:post_date>
 		<wp:post_type>book</wp:post_type>
 		<wp:status>publish</wp:status>
-		<content:encoded><![CDATA[A prelude to The Lord of the Rings, following Bilbo Baggins on an unexpected journey filled with adventure, treasure, and dragons.]]></content:encoded>
+		<content:encoded><![CDATA[<!-- wp:paragraph --><p>A prelude to The Lord of the Rings, following Bilbo Baggins on an unexpected journey filled with adventure, treasure, and dragons.</p><!-- /wp:paragraph -->]]></content:encoded>
 	</item>
 
 	<item>
@@ -131,7 +131,7 @@
 		<wp:post_date>2026-03-23 13:00:00</wp:post_date>
 		<wp:post_type>book</wp:post_type>
 		<wp:status>publish</wp:status>
-		<content:encoded><![CDATA[A provocative novel exploring identity, consumerism, and rebellion through an underground fight club.]]></content:encoded>
+		<content:encoded><![CDATA[<!-- wp:paragraph --><p>A provocative novel exploring identity, consumerism, and rebellion through an underground fight club.</p><!-- /wp:paragraph -->]]></content:encoded>
 	</item>
 
 	<item>
@@ -141,7 +141,30 @@
 		<wp:post_date>2026-04-20 14:30:00</wp:post_date>
 		<wp:post_type>book</wp:post_type>
 		<wp:status>publish</wp:status>
-		<content:encoded><![CDATA[A pivotal installment in A Song of Ice and Fire featuring major battles, betrayals, and shifting alliances across Westeros.]]></content:encoded>
+		<content:encoded><![CDATA[<!-- wp:paragraph --><p>A pivotal installment in A Song of Ice and Fire featuring major battles, betrayals, and shifting alliances across Westeros.</p><!-- /wp:paragraph -->]]></content:encoded>
+	</item>
+
+	<item>
+		<title>Put the right content front and center automatically</title>
+		<dc:creator><![CDATA[admin]]></dc:creator>
+		<pubDate>Mon, 20 Apr 2026 18:30:00 +0000</pubDate>
+		<wp:post_slug>welcome</wp:post_slug>
+		<wp:post_date>2026-04-20 14:30:00</wp:post_date>
+		<wp:post_type>page</wp:post_type>
+		<wp:post_id>998</wp:post_id>
+		<wp:status>publish</wp:status>
+		<content:encoded><![CDATA[<!-- wp:paragraph --><p>WordPress lets you pin a post to the top of your blog. Stickify takes that same idea and brings it to every public post type on your site. Whether it's Recipes, books, press releases, case studies or any other post type, you can make it stick.</p><!-- /wp:paragraph --><!-- wp:paragraph --><p>Enable sticky support per post type from the Settings screen, flip a toggle in the block editor sidebar, and Stickify handles the rest. No shortcodes, no custom templates, no manual query hacks.</p><!-- /wp:paragraph --><!-- wp:heading --><h2 class="wp-block-heading"><strong>The real benefit of Stickify is in scheduling</strong></h2><!-- /wp:heading --><!-- wp:paragraph --><p>Sticky posts are most useful when they're timely. A product announcement should lead the archive on launch day. A seasonal recipe should surface when it's relevant. That's where scheduling changes everything.</p><!-- /wp:paragraph --><!-- wp:paragraph --><p>Stickify lets you set a <strong>start date</strong> and an <strong>end date</strong> for sticky behavior directly from the block editor. Set it up once, and the post promotes itself when it matters and steps back when it doesn't. No reminder to come back and uncheck a box. You can pick start or end, start and end, or neither.. it's flexible.</p><!-- /wp:paragraph --><!-- wp:heading --><h2 class="wp-block-heading"><strong>The best workflow is an easy one</strong></h2><!-- /wp:heading --><!-- wp:paragraph --><p>Manual sticky management is easy to forget and tedious to audit. Which posts are sticky? When did that go up? Did someone remember to unstick last month's announcement? These questions don't have great answers when the work is done ad hoc.</p><!-- /wp:paragraph --><!-- wp:paragraph --><p>Stickify centralizes that work. The settings screen shows you every sticky post across your enabled post types and lets you remove sticky status in bulk when it's time to clean house. Scheduled posts come and go on their own. You stay in control without babysitting.</p><!-- /wp:paragraph --><!-- wp:paragraph --><p>The controls live in the block editor's document sidebar, right where editors already work. There's nothing new to learn, and nothing to install beyond activating the plugin.</p><!-- /wp:paragraph --><!-- wp:heading --><h2 class="wp-block-heading"><strong>Stickify is an enhancement, not a replacement</strong></h2><!-- /wp:heading --><!-- wp:paragraph --><p>Stickify doesn't replace WordPress's native sticky functionality - it extends it. For the standard Posts post type, Stickify's toggle works alongside core's own sticky flag. Check one and you've checked both. Uncheck it and both are cleared.</p><!-- /wp:paragraph --><!-- wp:paragraph --><p>The same care goes for the Query Loop block. Stickify hooks into query loop output so your block-based templates get the same sticky behavior as your classic archive pages. Build with blocks, get sticky for free.</p><!-- /wp:paragraph --><!-- wp:heading --><h2 class="wp-block-heading"><strong>Performance matters</strong></h2><!-- /wp:heading --><!-- wp:paragraph --><p>Sticky posts don't change that often, but they're queried constantly. On every archive page load for every enabled post type, and recalculating that on every request adds up.</p><!-- /wp:paragraph --><!-- wp:paragraph --><p>Stickify caches sticky post lookups so the extra query runs once and the result is reused. The default cache window is 15 minutes, and you can tune that to match your publishing cadence from the settings screen. Publish frequently? Shorten it. Set-and-forget content? Extend it. The cache clears automatically whenever a relevant post's sticky state changes, so editors never see stale results.</p><!-- /wp:paragraph --><!-- wp:paragraph --><p>If you ever run into stale cache, head to the settings screen and hit the "Clear Cache Now" button to dump all Stickify cache.</p><!-- /wp:paragraph --><!-- wp:separator --><hr class="wp-block-separator has-alpha-channel-opacity"/><!-- /wp:separator --><!-- wp:heading --><h2 class="wp-block-heading"><strong>Feedback</strong></h2><!-- /wp:heading --><!-- wp:paragraph --><p>Stickify is open source and actively maintained. If you run into a bug, have a feature request, or want to suggest an improvement, <a href="https://github.com/rareview/stickify/issues" target="_blank" rel="noreferrer noopener nofollow">open an issue on GitHub</a>.</p><!-- /wp:paragraph --><!-- wp:paragraph --><p>When reporting a bug, it helps to include the WordPress and PHP versions you're running, what plugins are active, and steps to reproduce the issue.</p><!-- /wp:paragraph -->]]></content:encoded>
+	</item>
+
+	<item>
+		<title>Blog</title>
+		<dc:creator><![CDATA[admin]]></dc:creator>
+		<pubDate>Mon, 20 Apr 2026 18:30:00 +0000</pubDate>
+		<wp:post_date>2026-04-20 14:30:00</wp:post_date>
+		<wp:post_type>page</wp:post_type>
+		<wp:post_id>999</wp:post_id>
+		<wp:status>publish</wp:status>
+		<content:encoded><![CDATA[]]></content:encoded>
 	</item>
 
 </channel>

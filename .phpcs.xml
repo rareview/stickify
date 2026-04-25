@@ -6,7 +6,7 @@
 	<arg name="colors" />
 	<arg value="sp"/>
 	<arg name="extensions" value="php"/>
-	
+
 	<rule ref="WordPress">
 		<exclude name="Generic.Arrays.DisallowShortArraySyntax.Found" />
 		<exclude name="Universal.Arrays.DisallowShortArraySyntax.Found" />
@@ -27,7 +27,8 @@
 
 	<exclude-pattern>*/node_modules/*</exclude-pattern>
 	<exclude-pattern>*/vendor/*</exclude-pattern>
-	
+	<exclude-pattern>*.asset.php</exclude-pattern>
+
 	<config name="testVersion" value="8.2-" />
 	<config name="minimum_supported_wp_version" value="6.5" />
 	<ini name="error_reporting" value="E_ALL &#38; ~E_DEPRECATED" />

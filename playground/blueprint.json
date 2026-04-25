@@ -15,8 +15,8 @@
     {
       "step": "installTheme",
       "themeData": {
-        "resource": "url",
-        "url": "https://raw.githubusercontent.com/rareview/stickify/main/playground/blueprint-theme.zip"
+        "resource": "bundled",
+        "path": "blueprint-theme.zip"
       },
       "options": {
         "activate": true,
@@ -26,20 +26,40 @@
     {
       "step": "importWxr",
       "file": {
-        "resource": "url",
-        "url": "https://raw.githubusercontent.com/rareview/stickify/main/playground/content/blueprint-content.xml"
+        "resource": "bundled",
+        "path": "content/blueprint-content.xml"
       }
     },
     {
       "step": "installPlugin",
       "pluginData": {
-        "resource": "url",
-        "url": "https://raw.githubusercontent.com/rareview/stickify/main/playground/stickify.zip"
+        "resource": "bundled",
+        "path": "stickify.zip"
       },
       "options": {
         "activate": true,
         "targetFolderName": "stickify"
       }
+    },
+    {
+      "step": "wp-cli",
+      "command": "wp option update blogname 'Stickify Playground'"
+    },
+    {
+      "step": "wp-cli",
+      "command": "wp option update blogdescription 'A WordPress plugin to make any post type sticky and schedule it.'"
+    },
+    {
+      "step": "wp-cli",
+      "command": "wp option update show_on_front page"
+    },
+    {
+      "step": "wp-cli",
+      "command": "wp option update page_on_front 998"
+    },
+    {
+      "step": "wp-cli",
+      "command": "wp option update page_for_posts 999"
     }
   ]
 }

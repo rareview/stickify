@@ -5,15 +5,15 @@
  *
  * @author Rareview <hello@rareview.com>
  *
- * @package Stickify
+ * @package
  */
+
+import { registerPlugin } from '@wordpress/plugins';
 
 import StickifySidebar from './components/StickifySidebar';
 
-const { registerPlugin } = wp.plugins;
-
-registerPlugin('rv-stickify-sidebar', {
+registerPlugin( 'rv-stickify-sidebar', {
 	render() {
 		return <StickifySidebar />;
 	},
-});
+} );
