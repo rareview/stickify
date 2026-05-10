@@ -29,8 +29,8 @@
     "playground": "npx @wp-playground/cli --blueprint=./playground server --blueprint-may-read-adjacent-files"
   },
   "devDependencies": {
-    "@commitlint/cli": "^20.1.0",
-    "@commitlint/config-conventional": "^20.0.0",
+    "@commitlint/cli": "^21.0.0",
+    "@commitlint/config-conventional": "^21.0.0",
     "@prantlf/jsonlint": "^16.0.0",
     "@wordpress/scripts": "^30.0.0",
     "commit-and-tag-version": "^12.6.0",
