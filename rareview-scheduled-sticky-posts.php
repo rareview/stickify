@@ -1,15 +1,15 @@
 <?php
 /**
- * Plugin Name: Stickify - Scheduled Sticky Posts
+ * Plugin Name: Rareview Scheduled Sticky Posts
  * Description: Add, schedule, and manage sticky posts across post types.
  * Version:     1.0.0
- * Author:      Rareview
+ * Author:      Rareview®
  * Author URI:  https://rareview.com
  * License:     GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text domain: stickify
+ * Text Domain: rareview-scheduled-sticky-posts
  *
- * @package Stickify
+ * @package RareviewScheduledStickyPosts
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -20,6 +20,6 @@ require_once __DIR__ . '/includes/Helpers.php';
 require_once __DIR__ . '/includes/Register.php';
 require_once __DIR__ . '/includes/Rest.php';
 require_once __DIR__ . '/includes/Settings.php';
-require_once __DIR__ . '/includes/StickifyServiceProvider.php';
+require_once __DIR__ . '/includes/RareviewScheduledStickyPostsServiceProvider.php';
 
-new Stickify\Inc\StickifyServiceProvider();
+new RareviewScheduledStickyPosts\Inc\RareviewScheduledStickyPostsServiceProvider();

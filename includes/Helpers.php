@@ -2,21 +2,21 @@
 /**
  * Helpers class.
  *
- * @author Rareview <hello@rareview.com>
+ * @author Rareview® <hello@rareview.com>
  *
- * @package Stickify
+ * @package RareviewScheduledStickyPosts
  */
 
-namespace Stickify\Inc;
+namespace RareviewScheduledStickyPosts\Inc;
 
-use Stickify\Inc\Register;
+use RareviewScheduledStickyPosts\Inc\Register;
 
 /**
  * Class Registry
  */
 class Helpers {
 
-	const STICKIFY_CACHE_KEY = 'stickify_post_type';
+	const RAREVIEW_SCHEDULED_STICKY_POSTS_CACHE_KEY = 'rareview_scheduled_sticky_posts_post_type';
 
 	/**
 	 * Plugin version.
@@ -35,7 +35,7 @@ class Helpers {
 	 * @return string Asset URL.
 	 */
 	public static function asset_url( string $file ): string {
-		return plugins_url( 'dist/' . $file, dirname( __DIR__ ) . '/stickify.php' );
+		return plugins_url( 'dist/' . $file, dirname( __DIR__ ) . '/rareview-scheduled-sticky-posts.php' );
 	}
 
 	/**
@@ -63,8 +63,8 @@ class Helpers {
 	 *
 	 * @return array
 	 */
-	public static function get_stickify_post_types() {
-		return (array) get_option( 'stickify_post_types', [] );
+	public static function get_rareview_scheduled_sticky_posts_post_types() {
+		return (array) get_option( 'rareview_scheduled_sticky_posts_post_types', [] );
 	}
 
 	/**
@@ -72,8 +72,8 @@ class Helpers {
 	 *
 	 * @return int
 	 */
-	public static function get_stickify_cache_length(): int {
-		$cache_length = absint( get_option( 'stickify_cache_length', 15 ) );
+	public static function get_rareview_scheduled_sticky_posts_cache_length(): int {
+		$cache_length = absint( get_option( 'rareview_scheduled_sticky_posts_cache_length', 15 ) );
 
 		return max( 1, $cache_length );
 	}
@@ -85,14 +85,14 @@ class Helpers {
 	 *
 	 * @return array
 	 */
-	public static function get_stickify_posts_by_type( string $post_type ): array {
+	public static function get_rareview_scheduled_sticky_posts_posts_by_type( string $post_type ): array {
 		if ( empty( $post_type ) ) {
 			return [];
 		}
 
-		$stickify_post_ids = get_transient( self::STICKIFY_CACHE_KEY . '-' . $post_type );
+		$rareview_scheduled_sticky_posts_post_ids = get_transient( self::RAREVIEW_SCHEDULED_STICKY_POSTS_CACHE_KEY . '-' . $post_type );
 
-		if ( false === $stickify_post_ids ) {
+		if ( false === $rareview_scheduled_sticky_posts_post_ids ) {
 			$current_time = time();
 
 			$args = [
@@ -100,15 +100,15 @@ class Helpers {
 				'post_status'            => 'publish',
 				'posts_per_page'         => -1,
 				'fields'                 => 'ids',
-				'stickify_post_types'    => false,
-				'ignore_stickify_posts'  => true,
+				'rareview_scheduled_sticky_posts_post_types'    => false,
+				'ignore_rareview_scheduled_sticky_posts_posts'  => true,
 				'no_found_rows'          => true,
 				'update_post_meta_cache' => false,
 				'update_post_term_cache' => false,
 				'meta_query'             => [ // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 					'relation' => 'AND',
 					[
-						'key'     => Register::STICKIFY_META_KEY,
+						'key'     => Register::RAREVIEW_SCHEDULED_STICKY_POSTS_META_KEY,
 						'value'   => '1',
 						'compare' => '=',
 						'type'    => 'NUMERIC',
@@ -116,22 +116,22 @@ class Helpers {
 					[
 						'relation' => 'OR',
 						[
-							'key'     => Register::STICKIFY_START_META_KEY,
+							'key'     => Register::RAREVIEW_SCHEDULED_STICKY_POSTS_START_META_KEY,
 							'compare' => 'NOT EXISTS',
 						],
 						[
-							'key'     => Register::STICKIFY_START_META_KEY,
+							'key'     => Register::RAREVIEW_SCHEDULED_STICKY_POSTS_START_META_KEY,
 							'value'   => '',
 							'compare' => '=',
 						],
 						[
-							'key'     => Register::STICKIFY_START_META_KEY,
+							'key'     => Register::RAREVIEW_SCHEDULED_STICKY_POSTS_START_META_KEY,
 							'value'   => 0,
 							'compare' => '=',
 							'type'    => 'NUMERIC',
 						],
 						[
-							'key'     => Register::STICKIFY_START_META_KEY,
+							'key'     => Register::RAREVIEW_SCHEDULED_STICKY_POSTS_START_META_KEY,
 							'value'   => $current_time,
 							'compare' => '<=',
 							'type'    => 'NUMERIC',
@@ -140,22 +140,22 @@ class Helpers {
 					[
 						'relation' => 'OR',
 						[
-							'key'     => Register::STICKIFY_UNTIL_META_KEY,
+							'key'     => Register::RAREVIEW_SCHEDULED_STICKY_POSTS_UNTIL_META_KEY,
 							'compare' => 'NOT EXISTS',
 						],
 						[
-							'key'     => Register::STICKIFY_UNTIL_META_KEY,
+							'key'     => Register::RAREVIEW_SCHEDULED_STICKY_POSTS_UNTIL_META_KEY,
 							'value'   => '',
 							'compare' => '=',
 						],
 						[
-							'key'     => Register::STICKIFY_UNTIL_META_KEY,
+							'key'     => Register::RAREVIEW_SCHEDULED_STICKY_POSTS_UNTIL_META_KEY,
 							'value'   => 0,
 							'compare' => '=',
 							'type'    => 'NUMERIC',
 						],
 						[
-							'key'     => Register::STICKIFY_UNTIL_META_KEY,
+							'key'     => Register::RAREVIEW_SCHEDULED_STICKY_POSTS_UNTIL_META_KEY,
 							'value'   => $current_time,
 							'compare' => '>',
 							'type'    => 'NUMERIC',
@@ -164,27 +164,27 @@ class Helpers {
 				],
 			];
 
-			$stickify_post_ids = get_posts( $args );
+			$rareview_scheduled_sticky_posts_post_ids = get_posts( $args );
 
-			set_transient( self::STICKIFY_CACHE_KEY . '-' . $post_type, $stickify_post_ids, MINUTE_IN_SECONDS * self::get_stickify_cache_length() );
+			set_transient( self::RAREVIEW_SCHEDULED_STICKY_POSTS_CACHE_KEY . '-' . $post_type, $rareview_scheduled_sticky_posts_post_ids, MINUTE_IN_SECONDS * self::get_rareview_scheduled_sticky_posts_cache_length() );
 		}
 
-		return array_map( 'absint', (array) $stickify_post_ids );
+		return array_map( 'absint', (array) $rareview_scheduled_sticky_posts_post_ids );
 	}
 
 	/**
-	 * Delete stickify posts cache for a post type.
+	 * Delete rareview_scheduled_sticky_posts posts cache for a post type.
 	 *
 	 * @param string $post_type Post type to clear cache for.
 	 *
 	 * @return void
 	 */
-	public static function delete_stickify_cache_by_type( string $post_type ): void {
+	public static function delete_rareview_scheduled_sticky_posts_cache_by_type( string $post_type ): void {
 		if ( empty( $post_type ) ) {
 			return;
 		}
 
-		delete_transient( self::STICKIFY_CACHE_KEY . '-' . $post_type );
+		delete_transient( self::RAREVIEW_SCHEDULED_STICKY_POSTS_CACHE_KEY . '-' . $post_type );
 	}
 
 	/**

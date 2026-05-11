@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-/* global stickifyAdmin */
+/* global rareviewScheduledStickyPostsAdmin */
 import apiFetch from '@wordpress/api-fetch';
 import {
 	Button,
@@ -16,36 +16,39 @@ import { useEffect, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 const SETTINGS_REST_PATH = '/wp/v2/settings';
-const SETTINGS_OPTION_KEY = 'stickify_post_types';
-const CACHE_LENGTH_OPTION_KEY = 'stickify_cache_length';
-const CLEAR_CACHE_REST_PATH = '/stickify/v1/cache/clear';
-const STICKIFY_POSTS_REST_PATH = '/stickify/v1/sticky-posts';
-const CLEAR_STICKIFY_POSTS_REST_PATH = '/stickify/v1/sticky-posts/clear';
+const SETTINGS_OPTION_KEY = 'rareview_scheduled_sticky_posts_post_types';
+const CACHE_LENGTH_OPTION_KEY = 'rareview_scheduled_sticky_posts_cache_length';
+const CLEAR_CACHE_REST_PATH =
+	'/rareview-scheduled-sticky-posts/v1/cache/clear';
+const RAREVIEW_SCHEDULED_STICKY_POSTS_POSTS_REST_PATH =
+	'/rareview-scheduled-sticky-posts/v1/sticky-posts';
+const CLEAR_RAREVIEW_SCHEDULED_STICKY_POSTS_POSTS_REST_PATH =
+	'/rareview-scheduled-sticky-posts/v1/sticky-posts/clear';
 
-const StickifySettingsApp = () => {
+const RareviewScheduledStickyPostsSettingsApp = () => {
 	const [ isLoading, setIsLoading ] = useState( true );
 	const [ isSaving, setIsSaving ] = useState( false );
 	const [ isClearingCache, setIsClearingCache ] = useState( false );
-	const [ isLoadingStickifyPosts, setIsLoadingStickifyPosts ] =
+	const [ isLoadingRareviewScheduledStickyPostsPosts, setIsLoadingRareviewScheduledStickyPostsPosts ] =
 		useState( false );
-	const [ isClearingStickifyPosts, setIsClearingStickifyPosts ] =
+	const [ isClearingRareviewScheduledStickyPostsPosts, setIsClearingRareviewScheduledStickyPostsPosts ] =
 		useState( false );
 	const [ errorMessage, setErrorMessage ] = useState( '' );
 	const [ successMessage, setSuccessMessage ] = useState( '' );
 	const [ selectedPostTypes, setSelectedPostTypes ] = useState( [] );
 	const [ cacheLength, setCacheLength ] = useState( '15' );
-	const [ stickyPostsByType, setStickifyPostsByType ] = useState( {} );
+	const [ stickyPostsByType, setRareviewScheduledStickyPostsPostsByType ] = useState( {} );
 	const [ selectedStickyIdsByType, setSelectedStickyIdsByType ] = useState(
 		{}
 	);
 
 	const availablePostTypes = useMemo( () => {
-		return Object.entries( stickifyAdmin?.availablePostTypes || {} ).map(
-			( [ slug, label ] ) => ( {
-				slug,
-				label,
-			} )
-		);
+		return Object.entries(
+			rareviewScheduledStickyPostsAdmin?.availablePostTypes || {}
+		).map( ( [ slug, label ] ) => ( {
+			slug,
+			label,
+		} ) );
 	}, [] );
 
 	useEffect( () => {
@@ -71,7 +74,7 @@ const StickifySettingsApp = () => {
 			} catch ( error ) {
 				setErrorMessage(
 					error?.message ||
-						__( 'Unable to load settings.', 'stickify' )
+						__( 'Unable to load settings.', 'rareview-scheduled-sticky-posts' )
 				);
 			} finally {
 				setIsLoading( false );
@@ -86,44 +89,44 @@ const StickifySettingsApp = () => {
 			return;
 		}
 
-		const fetchStickifyPosts = async () => {
-			setIsLoadingStickifyPosts( true );
+		const fetchRareviewScheduledStickyPostsPosts = async () => {
+			setIsLoadingRareviewScheduledStickyPostsPosts( true );
 
 			try {
 				const response = await apiFetch( {
-					path: STICKIFY_POSTS_REST_PATH,
+					path: RAREVIEW_SCHEDULED_STICKY_POSTS_POSTS_REST_PATH,
 				} );
-				setStickifyPostsByType( response || {} );
+				setRareviewScheduledStickyPostsPostsByType( response || {} );
 				setSelectedStickyIdsByType( {} );
 			} catch ( error ) {
 				setErrorMessage(
 					error?.message ||
-						__( 'Unable to load sticky posts.', 'stickify' )
+						__( 'Unable to load sticky posts.', 'rareview-scheduled-sticky-posts' )
 				);
 			} finally {
-				setIsLoadingStickifyPosts( false );
+				setIsLoadingRareviewScheduledStickyPostsPosts( false );
 			}
 		};
 
-		fetchStickifyPosts();
+		fetchRareviewScheduledStickyPostsPosts();
 	}, [ isLoading ] );
 
-	const fetchStickifyPosts = async () => {
-		setIsLoadingStickifyPosts( true );
+	const fetchRareviewScheduledStickyPostsPosts = async () => {
+		setIsLoadingRareviewScheduledStickyPostsPosts( true );
 
 		try {
 			const response = await apiFetch( {
-				path: STICKIFY_POSTS_REST_PATH,
+				path: RAREVIEW_SCHEDULED_STICKY_POSTS_POSTS_REST_PATH,
 			} );
-			setStickifyPostsByType( response || {} );
+			setRareviewScheduledStickyPostsPostsByType( response || {} );
 			setSelectedStickyIdsByType( {} );
 		} catch ( error ) {
 			setErrorMessage(
 				error?.message ||
-					__( 'Unable to load sticky posts.', 'stickify' )
+					__( 'Unable to load sticky posts.', 'rareview-scheduled-sticky-posts' )
 			);
 		} finally {
-			setIsLoadingStickifyPosts( false );
+			setIsLoadingRareviewScheduledStickyPostsPosts( false );
 		}
 	};
 
@@ -176,11 +179,11 @@ const StickifySettingsApp = () => {
 			} );
 
 			setCacheLength( String( normalizedCacheLength ) );
-			setSuccessMessage( __( 'Settings saved.', 'stickify' ) );
-			await fetchStickifyPosts();
+			setSuccessMessage( __( 'Settings saved.', 'rareview-scheduled-sticky-posts' ) );
+			await fetchRareviewScheduledStickyPostsPosts();
 		} catch ( error ) {
 			setErrorMessage(
-				error?.message || __( 'Unable to save settings.', 'stickify' )
+				error?.message || __( 'Unable to save settings.', 'rareview-scheduled-sticky-posts' )
 			);
 		} finally {
 			setIsSaving( false );
@@ -200,81 +203,81 @@ const StickifySettingsApp = () => {
 
 			let cacheMessage = __(
 				'No sticky caches needed clearing.',
-				'stickify'
+				'rareview-scheduled-sticky-posts'
 			);
 
 			if ( response?.cleared > 0 ) {
-				cacheMessage = __( 'Sticky caches cleared.', 'stickify' );
+				cacheMessage = __( 'Sticky caches cleared.', 'rareview-scheduled-sticky-posts' );
 			}
 
 			setSuccessMessage( cacheMessage );
 		} catch ( error ) {
 			setErrorMessage(
 				error?.message ||
-					__( 'Unable to clear sticky caches.', 'stickify' )
+					__( 'Unable to clear sticky caches.', 'rareview-scheduled-sticky-posts' )
 			);
 		} finally {
 			setIsClearingCache( false );
 		}
 	};
 
-	const clearStickifyPosts = async ( postIds ) => {
+	const clearRareviewScheduledStickyPostsPosts = async ( postIds ) => {
 		if ( ! Array.isArray( postIds ) || postIds.length === 0 ) {
 			return;
 		}
 
-		setIsClearingStickifyPosts( true );
+		setIsClearingRareviewScheduledStickyPostsPosts( true );
 		setErrorMessage( '' );
 		setSuccessMessage( '' );
 
-		const clearStickifyPayload = {
+		const clearRareviewScheduledStickyPostsPayload = {
 			// eslint-disable-next-line camelcase
 			post_ids: postIds,
 		};
 
 		try {
 			const response = await apiFetch( {
-				path: CLEAR_STICKIFY_POSTS_REST_PATH,
+				path: CLEAR_RAREVIEW_SCHEDULED_STICKY_POSTS_POSTS_REST_PATH,
 				method: 'POST',
-				data: clearStickifyPayload,
+				data: clearRareviewScheduledStickyPostsPayload,
 			} );
 
 			let clearMessage = __(
 				'No sticky posts were cleared.',
-				'stickify'
+				'rareview-scheduled-sticky-posts'
 			);
 
 			if ( response?.cleared > 0 ) {
 				clearMessage = __(
 					'Sticky behavior removed from selected posts.',
-					'stickify'
+					'rareview-scheduled-sticky-posts'
 				);
 			}
 
 			setSuccessMessage( clearMessage );
-			await fetchStickifyPosts();
+			await fetchRareviewScheduledStickyPostsPosts();
 		} catch ( error ) {
 			setErrorMessage(
 				error?.message ||
-					__( 'Unable to clear sticky behavior.', 'stickify' )
+					__( 'Unable to clear sticky behavior.', 'rareview-scheduled-sticky-posts' )
 			);
 		} finally {
-			setIsClearingStickifyPosts( false );
+			setIsClearingRareviewScheduledStickyPostsPosts( false );
 		}
 	};
 
-	const clearSingleStickifyPost = async ( postId ) => {
-		await clearStickifyPosts( [ postId ] );
+	const clearSingleRareviewScheduledStickyPostsPost = async ( postId ) => {
+		await clearRareviewScheduledStickyPostsPosts( [ postId ] );
 	};
 
-	const clearSelectedStickifyPosts = async ( postType ) => {
+	const clearSelectedRareviewScheduledStickyPostsPosts = async ( postType ) => {
 		const selectedIds = selectedStickyIdsByType[ postType ] || [];
-		await clearStickifyPosts( selectedIds );
+		await clearRareviewScheduledStickyPostsPosts( selectedIds );
 	};
 
 	const formatTimestamp = ( timestamp ) => {
 		if ( ! timestamp ) {
-			return __( 'Not set', 'stickify' );
+			return __( 'Not set', 'rareview-scheduled-sticky-posts' );
 		}
 
 		return new Date( timestamp * 1000 ).toLocaleString();
@@ -285,19 +288,19 @@ const StickifySettingsApp = () => {
 		const now = Math.floor( Date.now() / 1000 );
 
 		if ( post?.stickyStart > now ) {
-			labels.push( __( 'Sticky (Upcoming)', 'stickify' ) );
+			labels.push( __( 'Sticky (Upcoming)', 'rareview-scheduled-sticky-posts' ) );
 		}
 
 		if ( post?.stickyUntil > 0 && post?.stickyUntil <= now ) {
-			labels.push( __( 'Sticky (Expired)', 'stickify' ) );
+			labels.push( __( 'Sticky (Expired)', 'rareview-scheduled-sticky-posts' ) );
 		}
 
 		return labels;
 	};
 
-	const clearSelectedLabel = isClearingStickifyPosts
-		? __( 'Clearing…', 'stickify' )
-		: __( 'Clear Selected', 'stickify' );
+	const clearSelectedLabel = isClearingRareviewScheduledStickyPostsPosts
+		? __( 'Clearing…', 'rareview-scheduled-sticky-posts' )
+		: __( 'Clear Selected', 'rareview-scheduled-sticky-posts' );
 
 	if ( isLoading ) {
 		return (
@@ -315,7 +318,7 @@ const StickifySettingsApp = () => {
 				<CardBody>
 					{ __(
 						'No public custom post types were found on this site.',
-						'stickify'
+						'rareview-scheduled-sticky-posts'
 					) }
 				</CardBody>
 			</Card>
@@ -339,7 +342,7 @@ const StickifySettingsApp = () => {
 				<p>
 					{ __(
 						'Enable sticky behavior for these post types:',
-						'stickify'
+						'rareview-scheduled-sticky-posts'
 					) }
 				</p>
 
@@ -357,10 +360,10 @@ const StickifySettingsApp = () => {
 				<TextControl
 					type="number"
 					min="1"
-					label={ __( 'Cache length in minutes', 'stickify' ) }
+					label={ __( 'Cache length in minutes', 'rareview-scheduled-sticky-posts' ) }
 					help={ __(
 						'How long sticky query results should be cached.',
-						'stickify'
+						'rareview-scheduled-sticky-posts'
 					) }
 					value={ cacheLength }
 					onChange={ ( value ) => setCacheLength( value ) }
@@ -370,33 +373,33 @@ const StickifySettingsApp = () => {
 					variant="primary"
 					onClick={ saveSettings }
 					disabled={
-						isSaving || isClearingCache || isClearingStickifyPosts
+						isSaving || isClearingCache || isClearingRareviewScheduledStickyPostsPosts
 					}
 					style={ { marginRight: '1em' } }
 				>
 					{ isSaving
-						? __( 'Saving…', 'stickify' )
-						: __( 'Save Changes', 'stickify' ) }
+						? __( 'Saving…', 'rareview-scheduled-sticky-posts' )
+						: __( 'Save Changes', 'rareview-scheduled-sticky-posts' ) }
 				</Button>
 
 				<Button
 					variant="secondary"
 					onClick={ clearCache }
 					disabled={
-						isSaving || isClearingCache || isClearingStickifyPosts
+						isSaving || isClearingCache || isClearingRareviewScheduledStickyPostsPosts
 					}
 				>
 					{ isClearingCache
-						? __( 'Clearing cache…', 'stickify' )
-						: __( 'Clear Cache Now', 'stickify' ) }
+						? __( 'Clearing cache…', 'rareview-scheduled-sticky-posts' )
+						: __( 'Clear Cache Now', 'rareview-scheduled-sticky-posts' ) }
 				</Button>
 
 				<hr style={ { margin: '24px 0' } } />
-				<h2>{ __( 'Sticky Posts', 'stickify' ) }</h2>
+				<h2>{ __( 'Sticky Posts', 'rareview-scheduled-sticky-posts' ) }</h2>
 
-				{ isLoadingStickifyPosts && <Spinner /> }
+				{ isLoadingRareviewScheduledStickyPostsPosts && <Spinner /> }
 
-				{ ! isLoadingStickifyPosts &&
+				{ ! isLoadingRareviewScheduledStickyPostsPosts &&
 					Object.entries( stickyPostsByType ).map(
 						( [ postType, payload ] ) => {
 							const posts = Array.isArray( payload?.posts )
@@ -416,7 +419,7 @@ const StickifySettingsApp = () => {
 										<p>
 											{ __(
 												'No posts are currently marked sticky.',
-												'stickify'
+												'rareview-scheduled-sticky-posts'
 											) }
 										</p>
 									) }
@@ -426,13 +429,13 @@ const StickifySettingsApp = () => {
 											<Button
 												variant="secondary"
 												onClick={ () =>
-													clearSelectedStickifyPosts(
+													clearSelectedRareviewScheduledStickyPostsPosts(
 														postType
 													)
 												}
 												disabled={
 													selectedIds.length === 0 ||
-													isClearingStickifyPosts ||
+													isClearingRareviewScheduledStickyPostsPosts ||
 													isSaving ||
 													isClearingCache
 												}
@@ -498,7 +501,7 @@ const StickifySettingsApp = () => {
 															<div>
 																{ __(
 																	'Start:',
-																	'stickify'
+																	'rareview-scheduled-sticky-posts'
 																) }{ ' ' }
 																{ formatTimestamp(
 																	post.stickyStart
@@ -506,7 +509,7 @@ const StickifySettingsApp = () => {
 																{ ' | ' }
 																{ __(
 																	'Until:',
-																	'stickify'
+																	'rareview-scheduled-sticky-posts'
 																) }{ ' ' }
 																{ formatTimestamp(
 																	post.stickyUntil
@@ -524,7 +527,7 @@ const StickifySettingsApp = () => {
 															>
 																{ __(
 																	'Edit',
-																	'stickify'
+																	'rareview-scheduled-sticky-posts'
 																) }
 															</a>
 														) }
@@ -532,19 +535,19 @@ const StickifySettingsApp = () => {
 														<Button
 															variant="secondary"
 															onClick={ () =>
-																clearSingleStickifyPost(
+																clearSingleRareviewScheduledStickyPostsPost(
 																	post.id
 																)
 															}
 															disabled={
-																isClearingStickifyPosts ||
+																isClearingRareviewScheduledStickyPostsPosts ||
 																isSaving ||
 																isClearingCache
 															}
 														>
 															{ __(
 																'Clear Sticky',
-																'stickify'
+																'rareview-scheduled-sticky-posts'
 															) }
 														</Button>
 													</div>
@@ -561,4 +564,4 @@ const StickifySettingsApp = () => {
 	);
 };
 
-export default StickifySettingsApp;
+export default RareviewScheduledStickyPostsSettingsApp;

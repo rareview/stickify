@@ -2,12 +2,12 @@
 /**
  * REST class.
  *
- * @author Rareview <hello@rareview.com>
+ * @author Rareview® <hello@rareview.com>
  *
- * @package Stickify
+ * @package RareviewScheduledStickyPosts
  */
 
-namespace Stickify\Inc;
+namespace RareviewScheduledStickyPosts\Inc;
 
 use WP_Post;
 use WP_REST_Request;
@@ -44,7 +44,7 @@ class Rest {
 			'/post-types',
 			[
 				'methods'             => 'GET',
-				'callback'            => [ $this, 'get_stickify_post_types' ],
+				'callback'            => [ $this, 'get_rareview_scheduled_sticky_posts_post_types' ],
 				'permission_callback' => '__return_true',
 			]
 		);
@@ -54,8 +54,8 @@ class Rest {
 			'/cache/clear',
 			[
 				'methods'             => 'POST',
-				'callback'            => [ $this, 'clear_stickify_caches' ],
-				'permission_callback' => [ $this, 'can_manage_stickify_settings' ],
+				'callback'            => [ $this, 'clear_rareview_scheduled_sticky_posts_caches' ],
+				'permission_callback' => [ $this, 'can_manage_rareview_scheduled_sticky_posts_settings' ],
 			]
 		);
 
@@ -64,8 +64,8 @@ class Rest {
 			'/sticky-posts',
 			[
 				'methods'             => 'GET',
-				'callback'            => [ $this, 'get_stickify_posts' ],
-				'permission_callback' => [ $this, 'can_manage_stickify_settings' ],
+				'callback'            => [ $this, 'get_rareview_scheduled_sticky_posts_posts' ],
+				'permission_callback' => [ $this, 'can_manage_rareview_scheduled_sticky_posts_settings' ],
 			]
 		);
 
@@ -74,8 +74,8 @@ class Rest {
 			'/sticky-posts/clear',
 			[
 				'methods'             => 'POST',
-				'callback'            => [ $this, 'clear_stickify_posts' ],
-				'permission_callback' => [ $this, 'can_manage_stickify_settings' ],
+				'callback'            => [ $this, 'clear_rareview_scheduled_sticky_posts_posts' ],
+				'permission_callback' => [ $this, 'can_manage_rareview_scheduled_sticky_posts_settings' ],
 			]
 		);
 	}
@@ -85,8 +85,8 @@ class Rest {
 	 *
 	 * @return array
 	 */
-	public function get_stickify_post_types() {
-		return Helpers::get_stickify_post_types();
+	public function get_rareview_scheduled_sticky_posts_post_types() {
+		return Helpers::get_rareview_scheduled_sticky_posts_post_types();
 	}
 
 	/**
@@ -96,8 +96,8 @@ class Rest {
 	 *
 	 * @return array<string, array<string, mixed>>
 	 */
-	public function get_stickify_posts( WP_REST_Request $request ): array {
-		$enabled_post_types = Helpers::get_stickify_post_types();
+	public function get_rareview_scheduled_sticky_posts_posts( WP_REST_Request $request ): array {
+		$enabled_post_types = Helpers::get_rareview_scheduled_sticky_posts_post_types();
 		$requested_type     = sanitize_key( (string) $request->get_param( 'post_type' ) );
 
 		if ( ! empty( $requested_type ) ) {
@@ -118,8 +118,8 @@ class Rest {
 					'post_status'            => [ 'publish', 'future', 'draft', 'pending', 'private' ],
 					'posts_per_page'         => -1,
 					'fields'                 => 'ids',
-					'stickify_post_types'    => false,
-					'ignore_stickify_posts'  => true,
+					'rareview_scheduled_sticky_posts_post_types'    => false,
+					'ignore_rareview_scheduled_sticky_posts_posts'  => true,
 					'orderby'                => 'date',
 					'order'                  => 'DESC',
 					'no_found_rows'          => true,
@@ -127,7 +127,7 @@ class Rest {
 					'update_post_term_cache' => false,
 					'meta_query'             => [ // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 						[
-							'key'     => Register::STICKIFY_META_KEY,
+							'key'     => Register::RAREVIEW_SCHEDULED_STICKY_POSTS_META_KEY,
 							'value'   => '1',
 							'compare' => '=',
 							'type'    => 'NUMERIC',
@@ -162,11 +162,11 @@ class Rest {
 
 					return [
 						'id'          => $post->ID,
-						'title'       => ! empty( $title ) ? $title : __( '(no title)', 'stickify' ),
+						'title'       => ! empty( $title ) ? $title : __( '(no title)', 'rareview-scheduled-sticky-posts' ),
 						'status'      => $post->post_status,
 						'editLink'    => get_edit_post_link( $post->ID, '' ),
-						'stickyStart' => absint( get_post_meta( $post->ID, Register::STICKIFY_START_META_KEY, true ) ),
-						'stickyUntil' => absint( get_post_meta( $post->ID, Register::STICKIFY_UNTIL_META_KEY, true ) ),
+						'stickyStart' => absint( get_post_meta( $post->ID, Register::RAREVIEW_SCHEDULED_STICKY_POSTS_START_META_KEY, true ) ),
+						'stickyUntil' => absint( get_post_meta( $post->ID, Register::RAREVIEW_SCHEDULED_STICKY_POSTS_UNTIL_META_KEY, true ) ),
 					];
 				},
 				$post_ids
@@ -188,14 +188,14 @@ class Rest {
 	 *
 	 * @return array<string, mixed>
 	 */
-	public function clear_stickify_posts( WP_REST_Request $request ): array {
+	public function clear_rareview_scheduled_sticky_posts_posts( WP_REST_Request $request ): array {
 		$post_ids = array_values(
 			array_filter(
 				array_map( 'absint', (array) $request->get_param( 'post_ids' ) )
 			)
 		);
 
-		$enabled_post_types = Helpers::get_stickify_post_types();
+		$enabled_post_types = Helpers::get_rareview_scheduled_sticky_posts_post_types();
 		$affected_types     = [];
 		$cleared_count      = 0;
 
@@ -210,9 +210,9 @@ class Rest {
 				continue;
 			}
 
-			delete_post_meta( $post_id, Register::STICKIFY_META_KEY );
-			delete_post_meta( $post_id, Register::STICKIFY_START_META_KEY );
-			delete_post_meta( $post_id, Register::STICKIFY_UNTIL_META_KEY );
+			delete_post_meta( $post_id, Register::RAREVIEW_SCHEDULED_STICKY_POSTS_META_KEY );
+			delete_post_meta( $post_id, Register::RAREVIEW_SCHEDULED_STICKY_POSTS_START_META_KEY );
+			delete_post_meta( $post_id, Register::RAREVIEW_SCHEDULED_STICKY_POSTS_UNTIL_META_KEY );
 
 			if ( 'post' === $post->post_type ) {
 				Helpers::remove_core_sticky_post( $post_id );
@@ -223,7 +223,7 @@ class Rest {
 		}
 
 		foreach ( array_keys( $affected_types ) as $post_type ) {
-			Helpers::delete_stickify_cache_by_type( $post_type );
+			Helpers::delete_rareview_scheduled_sticky_posts_cache_by_type( $post_type );
 		}
 
 		return [
@@ -237,11 +237,11 @@ class Rest {
 	 *
 	 * @return array<string, int>
 	 */
-	public function clear_stickify_caches(): array {
+	public function clear_rareview_scheduled_sticky_posts_caches(): array {
 		$cleared_count = 0;
 
-		foreach ( Helpers::get_stickify_post_types() as $post_type ) {
-			Helpers::delete_stickify_cache_by_type( $post_type );
+		foreach ( Helpers::get_rareview_scheduled_sticky_posts_post_types() as $post_type ) {
+			Helpers::delete_rareview_scheduled_sticky_posts_cache_by_type( $post_type );
 			++$cleared_count;
 		}
 
@@ -255,7 +255,7 @@ class Rest {
 	 *
 	 * @return bool
 	 */
-	public function can_manage_stickify_settings(): bool {
+	public function can_manage_rareview_scheduled_sticky_posts_settings(): bool {
 		return current_user_can( 'manage_options' );
 	}
 }

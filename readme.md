@@ -1,18 +1,18 @@
-# Stickify
+# Rareview Scheduled Sticky Posts
 
-Stickify is a WordPress plugin that adds sticky post behavior to post types beyond the default Posts post type.
+Rareview Scheduled Sticky Posts is a WordPress plugin that adds sticky post behavior to post types beyond the default Posts post type.
 
 It gives editors a sidebar control in the block editor to mark supported content as sticky, optionally schedule when the sticky state starts, and optionally set when it expires. On the front end, matching posts are moved to the top of eligible archive queries.
 
-[Launch Stickify Playground](https://playground.wordpress.net/?blueprint-url=https://raw.githubusercontent.com/rareview/stickify/main/playground/blueprint.json)
+[Launch Rareview Scheduled Sticky Posts Playground](https://playground.wordpress.net/?blueprint-url=https://raw.githubusercontent.com/rareview/rareview-scheduled-sticky-posts/main/playground/blueprint.json)
 
 ## How It Works
 
-- Enable sticky behavior for one or more public post types in **Settings > Stickify**.
-- Open a supported post in the block editor and enable **Stickify Settings**.
+- Enable sticky behavior for one or more public post types in **Settings > Rareview Scheduled Sticky Posts**.
+- Open a supported post in the block editor and enable **Scheduled Sticky Posts**.
 - Optionally set a start date and an end date for scheduled stickiness.
 - On archives and Query Loop block output for that post type, sticky content is prepended to the results.
-- Use the Stickify settings screen to clear cached sticky query results or bulk remove sticky behavior from posts.
+- Use the Rareview Scheduled Sticky Posts settings screen to clear cached sticky query results or bulk remove sticky behavior from posts.
 
 ## Features
 
@@ -41,7 +41,7 @@ Recommended local setup:
 
 ## Getting Started
 
-1. Clone this repository into `wp-content/plugins/stickify`.
+1. Clone this repository into `wp-content/plugins/rareview-scheduled-sticky-posts`.
 2. Install PHP dependencies with `composer install`.
 3. Install JavaScript dependencies with `npm install`.
 4. Build the plugin assets with `npm run build`.
@@ -60,19 +60,19 @@ For active development, run `npm run watch` to rebuild editor and admin assets a
 
 ## Using The Plugin
 
-1. Go to **Settings > Stickify**.
+1. Go to **Settings > Rareview Scheduled Sticky Posts**.
 2. Select the public post types that should support sticky behavior.
 3. Optionally adjust the cache length for sticky query results.
 4. Save settings.
 5. Edit a supported post in the block editor.
-6. Open the **Stickify Settings** panel in the document sidebar.
+6. Open the **Scheduled Sticky Posts** panel in the document sidebar.
 7. Enable sticky behavior and optionally choose start and end dates.
 8. View the relevant archive or Query Loop output to confirm the post has been promoted.
 
 ## Notes
 
 - Pages and attachments are intentionally excluded from the settings UI.
-- Stickify currently applies to queries that resolve to a single enabled post type.
+- Rareview Scheduled Sticky Posts currently applies to queries that resolve to a single enabled post type.
 - Supported post types must expose custom fields for the editor controls to appear.
 
 ## Playground

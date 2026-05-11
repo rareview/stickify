@@ -1,19 +1,19 @@
 <?php
 /**
- * Stickify service provider.
+ * RareviewScheduledStickyPosts service provider.
  *
- * @author Rareview <hello@rareview.com>
+ * @author Rareview® <hello@rareview.com>
  *
- * @package Stickify
+ * @package RareviewScheduledStickyPosts
  */
 
-namespace Stickify\Inc;
+namespace RareviewScheduledStickyPosts\Inc;
 
 /**
  *
  * Plugin service provider.
  */
-class StickifyServiceProvider {
+class RareviewScheduledStickyPostsServiceProvider {
 
 	/**
 	 * The plugin features that should be bootstrapped.

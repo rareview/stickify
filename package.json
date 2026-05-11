@@ -1,7 +1,7 @@
 {
-  "name": "stickify",
+  "name": "rareview-scheduled-sticky-posts",
   "version": "1.0.0",
-  "description": "Make any post type sticky",
+  "description": "Schedule and manage sticky posts across post types",
   "engineStrict": true,
   "engines": {
     "node": ">=20.17.0",
@@ -25,7 +25,7 @@
     "lint:plugin:js:fix": "wp-scripts lint-js --fix 'assets/js/**/*.js'",
     "release": "commit-and-tag-version --no-verify",
     "prepare": "husky",
-    "build:zip": "rm -rf playground/stickify && mkdir -p playground && rsync -av --exclude-from='.distignore' ./ playground/stickify/ && cd playground && zip -r stickify.zip stickify && rm -rf stickify",
+    "build:zip": "rm -rf playground/rareview-scheduled-sticky-posts && mkdir -p playground && rsync -av --exclude-from='.distignore' ./ playground/rareview-scheduled-sticky-posts/ && cd playground && zip -r rareview-scheduled-sticky-posts.zip rareview-scheduled-sticky-posts && rm -rf rareview-scheduled-sticky-posts",
     "playground": "npx @wp-playground/cli --blueprint=./playground server --blueprint-may-read-adjacent-files"
   },
   "devDependencies": {

@@ -7,9 +7,9 @@ import { withSelect, withDispatch, useSelect } from '@wordpress/data';
 import { PluginDocumentSettingPanel } from '@wordpress/edit-post';
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-const STICKIFY_META_KEY = '_stickify_sticky';
-const STICKIFY_UNTIL_META_KEY = '_stickify_sticky_until';
-const STICKIFY_START_META_KEY = '_stickify_sticky_start';
+const RAREVIEW_SCHEDULED_STICKY_POSTS_META_KEY = '_rareview_scheduled_sticky_posts_sticky';
+const RAREVIEW_SCHEDULED_STICKY_POSTS_UNTIL_META_KEY = '_rareview_scheduled_sticky_posts_sticky_until';
+const RAREVIEW_SCHEDULED_STICKY_POSTS_START_META_KEY = '_rareview_scheduled_sticky_posts_sticky_start';
 
 /**
  * Internal dependencies
@@ -17,7 +17,7 @@ const STICKIFY_START_META_KEY = '_stickify_sticky_start';
 import MetaToggleControlInput from './MetaToggleControlInput';
 import MetaDateControlInput from './MetaDateControlInput';
 
-const StickifySidebar = ( {
+const RareviewScheduledStickyPostsSidebar = ( {
 	postType,
 	postMeta,
 	setPostMeta,
@@ -31,10 +31,10 @@ const StickifySidebar = ( {
 	 * Fetch events from the REST API.
 	 */
 	useEffect( () => {
-		const fetchStickify = async () => {
+		const fetchRareviewScheduledStickyPosts = async () => {
 			try {
 				const response = await apiFetch( {
-					path: '/stickify/v1/post-types',
+					path: '/rareview-scheduled-sticky-posts/v1/post-types',
 				} );
 
 				setPostTypes( response );
@@ -45,7 +45,7 @@ const StickifySidebar = ( {
 			}
 		};
 
-		fetchStickify();
+		fetchRareviewScheduledStickyPosts();
 	}, [] );
 
 	const supportsCustomFields = useSelect(
@@ -65,20 +65,20 @@ const StickifySidebar = ( {
 		const isStickyEnabled =
 			'post' === postType
 				? Boolean( coreSticky ) ||
-				  Boolean( postMeta?.[ STICKIFY_META_KEY ] )
-				: Boolean( postMeta?.[ STICKIFY_META_KEY ] );
+				  Boolean( postMeta?.[ RAREVIEW_SCHEDULED_STICKY_POSTS_META_KEY ] )
+				: Boolean( postMeta?.[ RAREVIEW_SCHEDULED_STICKY_POSTS_META_KEY ] );
 
 		return (
 			<PluginDocumentSettingPanel
-				title={ __( 'Stickify Settings', 'stickify' ) }
+				title={ __( 'Scheduled Sticky Posts', 'rareview-scheduled-sticky-posts' ) }
 				icon="edit"
 				initialOpen="true"
 			>
 				<MetaToggleControlInput
-					metaKey={ STICKIFY_META_KEY }
+					metaKey={ RAREVIEW_SCHEDULED_STICKY_POSTS_META_KEY }
 					label={ __(
 						'Move this post to the front of the archive?',
-						'stickify'
+						'rareview-scheduled-sticky-posts'
 					) }
 					postType={ postType }
 					postMeta={ postMeta }
@@ -89,19 +89,19 @@ const StickifySidebar = ( {
 				{ isStickyEnabled && (
 					<>
 						<MetaDateControlInput
-							metaKey={ STICKIFY_START_META_KEY }
+							metaKey={ RAREVIEW_SCHEDULED_STICKY_POSTS_START_META_KEY }
 							label={ __(
 								'From when should this post be sticky? (optional)',
-								'stickify'
+								'rareview-scheduled-sticky-posts'
 							) }
 							postMeta={ postMeta }
 							setPostMeta={ setPostMeta }
 						/>
 						<MetaDateControlInput
-							metaKey={ STICKIFY_UNTIL_META_KEY }
+							metaKey={ RAREVIEW_SCHEDULED_STICKY_POSTS_UNTIL_META_KEY }
 							label={ __(
 								'Until when should this post be sticky? (optional)',
-								'stickify'
+								'rareview-scheduled-sticky-posts'
 							) }
 							postMeta={ postMeta }
 							setPostMeta={ setPostMeta }
@@ -151,8 +151,8 @@ export default compose( [
 				};
 
 				if ( ! value ) {
-					updates.meta[ STICKIFY_START_META_KEY ] = undefined;
-					updates.meta[ STICKIFY_UNTIL_META_KEY ] = undefined;
+					updates.meta[ RAREVIEW_SCHEDULED_STICKY_POSTS_START_META_KEY ] = undefined;
+					updates.meta[ RAREVIEW_SCHEDULED_STICKY_POSTS_UNTIL_META_KEY ] = undefined;
 				}
 
 				if ( 'post' === postType ) {
@@ -166,4 +166,4 @@ export default compose( [
 			},
 		};
 	} ),
-] )( StickifySidebar );
+] )( RareviewScheduledStickyPostsSidebar );

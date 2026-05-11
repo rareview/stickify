@@ -1,29 +1,29 @@
 {
-    "name": "rareview/stickify",
-    "description": "Stickify WordPress plugin.",
-    "version": "1.0.0",
-    "authors": [
-        {
-            "name": "Rareview",
-            "email": "hellow@rareview.com"
-        }
-    ],
-    "autoload": {
-        "psr-4": {
-            "Stickify\\": "",
-            "Stickify\\Inc\\": "includes/"
-        }
-    },
-    "config": {
-        "allow-plugins": {
-            "dealerdirect/phpcodesniffer-composer-installer": true
-        }
-    },
-    "require-dev": {
-        "wp-coding-standards/wpcs": "^3.0"
-    },
-    "scripts": {
-        "lint": "vendor/bin/phpcs --standard=.phpcs.xml",
-        "format": "vendor/bin/phpcbf --standard=.phpcs.xml"
+  "name": "rareview/rareview-scheduled-sticky-posts",
+  "description": "Rareview Scheduled Sticky Posts WordPress plugin.",
+  "version": "1.0.0",
+  "authors": [
+    {
+      "name": "Rareview®",
+      "email": "hellow@rareview.com"
     }
+  ],
+  "autoload": {
+    "psr-4": {
+      "RareviewScheduledStickyPosts\\": "",
+      "RareviewScheduledStickyPosts\\Inc\\": "includes/"
+    }
+  },
+  "config": {
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    }
+  },
+  "require-dev": {
+    "wp-coding-standards/wpcs": "^3.0"
+  },
+  "scripts": {
+    "lint": "vendor/bin/phpcs --standard=.phpcs.xml",
+    "format": "vendor/bin/phpcbf --standard=.phpcs.xml"
+  }
 }

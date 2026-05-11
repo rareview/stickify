@@ -6,10 +6,12 @@ import { createRoot } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import StickifySettingsApp from './components/StickifySettingsApp';
+import RareviewScheduledStickyPostsSettingsApp from './components/RareviewScheduledStickyPostsSettingsApp';
 
-const mountNode = document.getElementById( 'stickify-settings-app' );
+const mountNode = document.getElementById(
+	'rareview-scheduled-sticky-posts-settings-app'
+);
 
 if ( mountNode ) {
-	createRoot( mountNode ).render( <StickifySettingsApp /> );
+	createRoot( mountNode ).render( <RareviewScheduledStickyPostsSettingsApp /> );
 }

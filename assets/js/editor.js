@@ -3,17 +3,17 @@
  *
  * This file is used to add custom scripts to the WordPress block editor.
  *
- * @author Rareview <hello@rareview.com>
+ * @author Rareview® <hello@rareview.com>
  *
  * @package
  */
 
 import { registerPlugin } from '@wordpress/plugins';
 
-import StickifySidebar from './components/StickifySidebar';
+import RareviewScheduledStickyPostsSidebar from './components/RareviewScheduledStickyPostsSidebar';
 
-registerPlugin( 'rv-stickify-sidebar', {
+registerPlugin( 'rareview-scheduled-sticky-posts-sidebar', {
 	render() {
-		return <StickifySidebar />;
+		return <RareviewScheduledStickyPostsSidebar />;
 	},
 } );

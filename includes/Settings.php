@@ -2,14 +2,14 @@
 /**
  * Settings class.
  *
- * @author Rareview <hello@rareview.com>
+ * @author Rareview® <hello@rareview.com>
  *
- * @package Stickify
+ * @package RareviewScheduledStickyPosts
  */
 
-namespace Stickify\Inc;
+namespace RareviewScheduledStickyPosts\Inc;
 
-use Stickify\Inc\Helpers;
+use RareviewScheduledStickyPosts\Inc\Helpers;
 
 /**
  * Class Settings
@@ -29,18 +29,18 @@ class Settings {
 	 * @return void
 	 */
 	public function register_editor_assets() {
-		add_action( 'init', [ $this, 'stickify_register_settings' ] );
-		add_action( 'admin_menu', [ $this, 'stickify_admin_menu' ] );
+		add_action( 'init', [ $this, 'rareview_scheduled_sticky_posts_register_settings' ] );
+		add_action( 'admin_menu', [ $this, 'rareview_scheduled_sticky_posts_admin_menu' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_settings_assets' ] );
 		add_action(
-			'update_option_stickify_post_types',
-			[ $this, 'clear_stickify_caches_on_setting_update' ],
+			'update_option_rareview_scheduled_sticky_posts_post_types',
+			[ $this, 'clear_rareview_scheduled_sticky_posts_caches_on_setting_update' ],
 			10,
 			2
 		);
 		add_action(
-			'update_option_stickify_cache_length',
-			[ $this, 'clear_all_stickify_caches' ],
+			'update_option_rareview_scheduled_sticky_posts_cache_length',
+			[ $this, 'clear_all_rareview_scheduled_sticky_posts_caches' ],
 			10,
 			2
 		);
@@ -54,13 +54,13 @@ class Settings {
 	 * @return void
 	 */
 	public function enqueue_settings_assets( $hook_suffix ) {
-		if ( 'settings_page_stickify' !== $hook_suffix ) {
+		if ( 'settings_page_' . Register::ADMIN_PAGE_SLUG !== $hook_suffix ) {
 			return;
 		}
 
 		$asset = Helpers::asset_data( 'admin-settings' );
 		wp_enqueue_script(
-			Register::PREFIX . '-admin-settings-script',
+			Register::HANDLE_PREFIX . '-admin-settings-script',
 			Helpers::asset_url( 'admin-settings.js' ),
 			$asset['dependencies'],
 			$asset['version'],
@@ -70,8 +70,8 @@ class Settings {
 		wp_enqueue_style( 'wp-components' );
 
 		wp_localize_script(
-			Register::PREFIX . '-admin-settings-script',
-			'stickifyAdmin',
+			Register::HANDLE_PREFIX . '-admin-settings-script',
+			'rareviewScheduledStickyPostsAdmin',
 			[
 				'availablePostTypes' => $this->get_public_custom_post_types(),
 			]
@@ -81,13 +81,13 @@ class Settings {
 	/**
 	 * Register the sticky post types settings.
 	 */
-	public function stickify_register_settings() {
+	public function rareview_scheduled_sticky_posts_register_settings() {
 		register_setting(
-			'stickify_options_group',
-			'stickify_post_types',
+			'rareview_scheduled_sticky_posts_options_group',
+			'rareview_scheduled_sticky_posts_post_types',
 			[
 				'type'              => 'array',
-				'description'       => __( 'Array of post types to enable sticky functionality for.', 'stickify' ),
+				'description'       => __( 'Array of post types to enable sticky functionality for.', 'rareview-scheduled-sticky-posts' ),
 				'show_in_rest'      => [
 					'schema' => [
 						'type'  => 'array',
@@ -97,16 +97,16 @@ class Settings {
 					],
 				],
 				'default'           => [],
-				'sanitize_callback' => [ $this, 'sanitize_stickify_post_types' ],
+				'sanitize_callback' => [ $this, 'sanitize_rareview_scheduled_sticky_posts_post_types' ],
 			],
 		);
 
 		register_setting(
-			'stickify_options_group',
-			'stickify_cache_length',
+			'rareview_scheduled_sticky_posts_options_group',
+			'rareview_scheduled_sticky_posts_cache_length',
 			[
 				'type'              => 'integer',
-				'description'       => __( 'Sticky posts cache length in minutes.', 'stickify' ),
+				'description'       => __( 'Sticky posts cache length in minutes.', 'rareview-scheduled-sticky-posts' ),
 				'show_in_rest'      => [
 					'schema' => [
 						'type'    => 'integer',
@@ -115,7 +115,7 @@ class Settings {
 					],
 				],
 				'default'           => 15,
-				'sanitize_callback' => [ $this, 'sanitize_stickify_cache_length' ],
+				'sanitize_callback' => [ $this, 'sanitize_rareview_scheduled_sticky_posts_cache_length' ],
 			]
 		);
 	}
@@ -126,7 +126,7 @@ class Settings {
 	 * @param mixed $input The raw option value submitted for the setting.
 	 * @return array The sanitized array of allowed post type slugs.
 	 */
-	public function sanitize_stickify_post_types( $input ) {
+	public function sanitize_rareview_scheduled_sticky_posts_post_types( $input ) {
 		if ( ! is_array( $input ) ) {
 			return [];
 		}
@@ -150,31 +150,31 @@ class Settings {
 	 *
 	 * @return int
 	 */
-	public function sanitize_stickify_cache_length( $input ) {
+	public function sanitize_rareview_scheduled_sticky_posts_cache_length( $input ) {
 		return max( 1, absint( $input ) ?: 15 );
 	}
 
 	/**
 	 * Add admin menu item.
 	 */
-	public function stickify_admin_menu() {
+	public function rareview_scheduled_sticky_posts_admin_menu() {
 		add_options_page(
-			__( 'Stickify Settings', 'stickify' ),
-			__( 'Stickify', 'stickify' ),
+			__( 'Rareview Scheduled Sticky Posts Settings', 'rareview-scheduled-sticky-posts' ),
+			__( 'Rareview Scheduled Sticky Posts', 'rareview-scheduled-sticky-posts' ),
 			'manage_options',
-			'stickify',
-			[ $this, 'stickify_options_page' ]
+			Register::ADMIN_PAGE_SLUG,
+			[ $this, 'rareview_scheduled_sticky_posts_options_page' ]
 		);
 	}
 
 	/**
 	 * Setup the options page.
 	 */
-	public function stickify_options_page() {
+	public function rareview_scheduled_sticky_posts_options_page() {
 		?>
 		<div class="wrap">
-			<h1><?php esc_html_e( 'Stickify Settings', 'stickify' ); ?></h1>
-			<div id="stickify-settings-app"></div>
+			<h1><?php esc_html_e( 'Rareview Scheduled Sticky Posts Settings', 'rareview-scheduled-sticky-posts' ); ?></h1>
+			<div id="rareview-scheduled-sticky-posts-settings-app"></div>
 			<noscript>
 				<?php $this->render_settings_form(); ?>
 			</noscript>
@@ -189,21 +189,21 @@ class Settings {
 	 */
 	protected function render_settings_form() {
 		$public_post_types   = $this->get_public_custom_post_types();
-		$stickify_post_types = Helpers::get_stickify_post_types();
-		$cache_length        = Helpers::get_stickify_cache_length();
+		$rareview_scheduled_sticky_posts_post_types = Helpers::get_rareview_scheduled_sticky_posts_post_types();
+		$cache_length        = Helpers::get_rareview_scheduled_sticky_posts_cache_length();
 		?>
 		<form method="post" action="options.php">
 			<?php
-			settings_fields( 'stickify_options_group' );
-			do_settings_sections( 'stickify_options_group' );
+			settings_fields( 'rareview_scheduled_sticky_posts_options_group' );
+			do_settings_sections( 'rareview_scheduled_sticky_posts_options_group' );
 			?>
 			<table class="form-table">
 				<tr valign="top">
-					<th scope="row"><?php esc_html_e( 'Sticky Post Types', 'stickify' ); ?></th>
+					<th scope="row"><?php esc_html_e( 'Sticky Post Types', 'rareview-scheduled-sticky-posts' ); ?></th>
 					<td>
 						<?php foreach ( $public_post_types as $post_type => $label ) : ?>
 							<label>
-								<input type="checkbox" name="stickify_post_types[]" value="<?php echo esc_attr( $post_type ); ?>" <?php checked( in_array( $post_type, $stickify_post_types, true ) ); ?> />
+								<input type="checkbox" name="rareview_scheduled_sticky_posts_post_types[]" value="<?php echo esc_attr( $post_type ); ?>" <?php checked( in_array( $post_type, $rareview_scheduled_sticky_posts_post_types, true ) ); ?> />
 								<?php echo esc_html( $label ); ?>
 							</label><br>
 						<?php endforeach; ?>
@@ -211,21 +211,21 @@ class Settings {
 				</tr>
 				<tr valign="top">
 					<th scope="row">
-						<label for="stickify-cache-length"><?php esc_html_e( 'Cache Length', 'stickify' ); ?></label>
+						<label for="rareview-scheduled-sticky-posts-cache-length"><?php esc_html_e( 'Cache Length', 'rareview-scheduled-sticky-posts' ); ?></label>
 					</th>
 					<td>
 						<input
-							id="stickify-cache-length"
+							id="rareview-scheduled-sticky-posts-cache-length"
 							type="number"
 							min="1"
-							name="stickify_cache_length"
+							name="rareview_scheduled_sticky_posts_cache_length"
 							value="<?php echo esc_attr( $cache_length ); ?>"
 						/>
-						<p class="description"><?php esc_html_e( 'How long, in minutes, sticky query results should be cached.', 'stickify' ); ?></p>
+						<p class="description"><?php esc_html_e( 'How long, in minutes, sticky query results should be cached.', 'rareview-scheduled-sticky-posts' ); ?></p>
 					</td>
 				</tr>
 			</table>
-			<?php submit_button( __( 'Save Changes', 'stickify' ) ); ?>
+			<?php submit_button( __( 'Save Changes', 'rareview-scheduled-sticky-posts' ) ); ?>
 		</form>
 		<?php
 	}
@@ -263,14 +263,14 @@ class Settings {
 	 *
 	 * @return void
 	 */
-	public function clear_stickify_caches_on_setting_update( $old_value, $new_value ): void {
+	public function clear_rareview_scheduled_sticky_posts_caches_on_setting_update( $old_value, $new_value ): void {
 		$old_value = (array) $old_value;
 		$new_value = (array) $new_value;
 
 		$post_types = array_unique( array_merge( $old_value, $new_value ) );
 
 		foreach ( $post_types as $post_type ) {
-			Helpers::delete_stickify_cache_by_type( $post_type );
+			Helpers::delete_rareview_scheduled_sticky_posts_cache_by_type( $post_type );
 		}
 	}
 
@@ -282,11 +282,11 @@ class Settings {
 	 *
 	 * @return void
 	 */
-	public function clear_all_stickify_caches( $old_value, $new_value ): void {
+	public function clear_all_rareview_scheduled_sticky_posts_caches( $old_value, $new_value ): void {
 		unset( $old_value, $new_value );
 
-		foreach ( Helpers::get_stickify_post_types() as $post_type ) {
-			Helpers::delete_stickify_cache_by_type( $post_type );
+		foreach ( Helpers::get_rareview_scheduled_sticky_posts_post_types() as $post_type ) {
+			Helpers::delete_rareview_scheduled_sticky_posts_cache_by_type( $post_type );
 		}
 	}
 }

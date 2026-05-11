@@ -1,11 +1,11 @@
 {
   "$schema": "https://playground.wordpress.net/blueprint-schema.json",
   "meta": {
-    "title": "Stickify Playground",
+    "title": "Rareview Scheduled Sticky Posts Playground",
     "author": "rareview",
-    "description": "Install and activate Stickify in WordPress Playground with sample post data."
+    "description": "Install and activate Rareview Scheduled Sticky Posts in WordPress Playground with sample post data."
   },
-  "landingPage": "/wp-admin/options-general.php?page=stickify",
+  "landingPage": "/wp-admin/options-general.php?page=rareview-scheduled-sticky-posts",
   "preferredVersions": {
     "php": "8.2",
     "wp": "latest"
@@ -34,16 +34,16 @@
       "step": "installPlugin",
       "pluginData": {
         "resource": "bundled",
-        "path": "stickify.zip"
+        "path": "rareview-scheduled-sticky-posts.zip"
       },
       "options": {
         "activate": true,
-        "targetFolderName": "stickify"
+        "targetFolderName": "rareview-scheduled-sticky-posts"
       }
     },
     {
       "step": "wp-cli",
-      "command": "wp option update blogname 'Stickify Playground'"
+      "command": "wp option update blogname 'Rareview Scheduled Sticky Posts Playground'"
     },
     {
       "step": "wp-cli",
