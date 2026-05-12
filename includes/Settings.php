@@ -9,6 +9,10 @@
 
 namespace Stickify\Inc;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use Stickify\Inc\Helpers;
 
 /**

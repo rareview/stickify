@@ -9,6 +9,10 @@
 
 namespace Stickify\Inc;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use Stickify\Inc\Helpers;
 use WP_Post;
 use WP_Query;
@@ -39,14 +43,19 @@ class Register {
 	public function register_editor_assets() {
 		add_action( 'init', [ $this, 'register_meta' ] );
 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
+		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_quick_edit_assets' ] );
+		add_action( 'quick_edit_custom_box', [ $this, 'render_quick_edit_field' ], 10, 2 );
 		add_action( 'updated_post_meta', [ $this, 'maybe_clear_stickify_cache_on_meta_change' ], 10, 3 );
 		add_action( 'added_post_meta', [ $this, 'maybe_clear_stickify_cache_on_meta_change' ], 10, 3 );
 		add_action( 'deleted_post_meta', [ $this, 'maybe_clear_stickify_cache_on_meta_change' ], 10, 3 );
 		add_action( 'save_post', [ $this, 'maybe_clear_stickify_cache_on_save' ], 10, 2 );
+		add_action( 'save_post', [ $this, 'save_quick_edit_stickify_meta' ], 20, 2 );
 		add_action( 'before_delete_post', [ $this, 'maybe_clear_stickify_cache_on_delete' ] );
 		add_action( 'pre_get_posts', [ $this, 'maybe_remove_posts_from_query' ] );
 
 		add_filter( 'plugin_action_links_' . plugin_basename( dirname( __DIR__ ) . '/stickify.php' ), [ $this, 'add_settings_link_to_plugin_actions' ] );
+		add_filter( 'post_row_actions', [ $this, 'add_quick_edit_row_data' ], 10, 2 );
+		add_filter( 'page_row_actions', [ $this, 'add_quick_edit_row_data' ], 10, 2 );
 		add_filter( 'query_loop_block_query_vars', [ $this, 'enable_stickify_for_query_loop_block' ] );
 		add_filter( 'found_posts', [ $this, 'adjust_stickify_found_posts' ], 10, 2 );
 		add_filter( 'the_posts', [ $this, 'maybe_prepend_stickify_posts' ], 10, 2 );
@@ -245,6 +254,164 @@ class Register {
 	public function enqueue_editor_assets() {
 		$asset = Helpers::asset_data( 'editor' );
 		wp_enqueue_script( self::PREFIX . '-editor-script', Helpers::asset_url( 'editor.js' ), $asset['dependencies'], $asset['version'], true );
+	}
+
+	/**
+	 * Enqueue assets for post list quick edit integration.
+	 *
+	 * @param string $hook_suffix Current admin page hook suffix.
+	 *
+	 * @return void
+	 */
+	public function enqueue_quick_edit_assets( string $hook_suffix ): void {
+		if ( 'edit.php' !== $hook_suffix ) {
+			return;
+		}
+
+		$screen = get_current_screen();
+
+		if ( ! $screen || empty( $screen->post_type ) ) {
+			return;
+		}
+
+		if ( ! in_array( $screen->post_type, Helpers::get_stickify_post_types(), true ) ) {
+			return;
+		}
+
+		$asset = Helpers::asset_data( 'quick-edit' );
+
+		wp_enqueue_script(
+			self::PREFIX . '-quick-edit-script',
+			Helpers::asset_url( 'quick-edit.js' ),
+			$asset['dependencies'],
+			$asset['version'],
+			true
+		);
+	}
+
+	/**
+	 * Render stickify field in the quick edit panel.
+	 *
+	 * @param string $column_name The current column name.
+	 * @param string $post_type   The current post type.
+	 *
+	 * @return void
+	 */
+	public function render_quick_edit_field( string $column_name, string $post_type ): void {
+		if ( 'post' === $post_type ) {
+			return;
+		}
+
+		if ( ! in_array( $post_type, Helpers::get_stickify_post_types(), true ) ) {
+			return;
+		}
+
+		static $did_render = false;
+
+		if ( $did_render ) {
+			return;
+		}
+
+		$did_render = true;
+
+		wp_nonce_field( 'stickify_quick_edit', 'stickify_quick_edit_nonce', false );
+		?>
+		<fieldset class="inline-edit-col-right stickify-inline-edit-col-right">
+			<div class="inline-edit-col">
+				<input type="hidden" name="stickify_quick_edit_touched" value="0" />
+				<label class="alignleft">
+					<input type="checkbox" name="stickify_quick_edit" value="1" />
+					<span class="checkbox-title"><?php esc_html_e( 'Stickify', 'stickify' ); ?></span>
+				</label>
+			</div>
+		</fieldset>
+		<?php
+	}
+
+	/**
+	 * Add hidden quick edit row data for pre-filling the checkbox.
+	 *
+	 * @param array   $actions Existing row actions.
+	 * @param WP_Post $post    Current post object.
+	 *
+	 * @return array
+	 */
+	public function add_quick_edit_row_data( array $actions, WP_Post $post ): array {
+		if ( 'post' === $post->post_type ) {
+			return $actions;
+		}
+
+		if ( ! in_array( $post->post_type, Helpers::get_stickify_post_types(), true ) ) {
+			return $actions;
+		}
+
+		$actions['stickify_quick_edit_data'] = sprintf(
+			'<span class="stickify-quick-edit-data" data-stickify="%d" style="display:none;"></span>',
+			(bool) get_post_meta( $post->ID, self::STICKIFY_META_KEY, true ) ? 1 : 0
+		);
+
+		return $actions;
+	}
+
+	/**
+	 * Save stickify meta from quick edit updates.
+	 *
+	 * @param int     $post_id Post ID.
+	 * @param WP_Post $post    Post object.
+	 *
+	 * @return void
+	 */
+	public function save_quick_edit_stickify_meta( int $post_id, WP_Post $post ): void {
+		if ( wp_is_post_revision( $post_id ) || wp_is_post_autosave( $post_id ) ) {
+			return;
+		}
+
+		if ( 'post' === $post->post_type ) {
+			return;
+		}
+
+		if ( ! in_array( $post->post_type, Helpers::get_stickify_post_types(), true ) ) {
+			return;
+		}
+
+		if ( ! current_user_can( 'edit_post', $post_id ) ) {
+			return;
+		}
+
+		$inline_nonce = isset( $_POST['_inline_edit'] ) ? sanitize_text_field( wp_unslash( $_POST['_inline_edit'] ) ) : '';
+
+		if ( ! $inline_nonce || ! wp_verify_nonce( $inline_nonce, 'inlineeditnonce' ) ) {
+			return;
+		}
+
+		$stickify_nonce = isset( $_POST['stickify_quick_edit_nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['stickify_quick_edit_nonce'] ) ) : '';
+
+		if ( ! $stickify_nonce || ! wp_verify_nonce( $stickify_nonce, 'stickify_quick_edit' ) ) {
+			return;
+		}
+
+		$stickify_touched = isset( $_POST['stickify_quick_edit_touched'] ) ? absint( wp_unslash( $_POST['stickify_quick_edit_touched'] ) ) : 0;
+
+		if ( 1 !== $stickify_touched ) {
+			return;
+		}
+
+		$is_stickified = isset( $_POST['stickify_quick_edit'] );
+
+		update_post_meta( $post_id, self::STICKIFY_META_KEY, $is_stickified );
+
+		if ( ! $is_stickified ) {
+			delete_post_meta( $post_id, self::STICKIFY_START_META_KEY );
+			delete_post_meta( $post_id, self::STICKIFY_UNTIL_META_KEY );
+		}
+
+		if ( 'post' === $post->post_type ) {
+			if ( $is_stickified ) {
+				Helpers::add_core_sticky_post( $post_id );
+			} else {
+				Helpers::remove_core_sticky_post( $post_id );
+			}
+		}
 	}
 
 	/**
