@@ -9,6 +9,10 @@
 
 namespace RareviewScheduledStickyPosts\Inc;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use WP_Post;
 use WP_REST_Request;
 
@@ -114,18 +118,18 @@ class Rest {
 			$post_type_object = get_post_type_object( $post_type );
 			$post_ids         = get_posts(
 				[
-					'post_type'              => $post_type,
-					'post_status'            => [ 'publish', 'future', 'draft', 'pending', 'private' ],
-					'posts_per_page'         => -1,
-					'fields'                 => 'ids',
-					'rareview_scheduled_sticky_posts_post_types'    => false,
-					'ignore_rareview_scheduled_sticky_posts_posts'  => true,
-					'orderby'                => 'date',
-					'order'                  => 'DESC',
-					'no_found_rows'          => true,
-					'update_post_meta_cache' => false,
-					'update_post_term_cache' => false,
-					'meta_query'             => [ // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+					'post_type'                                    => $post_type,
+					'post_status'                                  => [ 'publish', 'future', 'draft', 'pending', 'private' ],
+					'posts_per_page'                               => -1,
+					'fields'                                       => 'ids',
+					'rareview_scheduled_sticky_posts_post_types'   => false,
+					'ignore_rareview_scheduled_sticky_posts_posts' => true,
+					'orderby'                                      => 'date',
+					'order'                                        => 'DESC',
+					'no_found_rows'                                => true,
+					'update_post_meta_cache'                       => false,
+					'update_post_term_cache'                       => false,
+					'meta_query'                                   => [ // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 						[
 							'key'     => Register::RAREVIEW_SCHEDULED_STICKY_POSTS_META_KEY,
 							'value'   => '1',

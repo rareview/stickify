@@ -9,6 +9,10 @@
 
 namespace RareviewScheduledStickyPosts\Inc;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use RareviewScheduledStickyPosts\Inc\Helpers;
 
 /**
@@ -188,9 +192,9 @@ class Settings {
 	 * @return void
 	 */
 	protected function render_settings_form() {
-		$public_post_types   = $this->get_public_custom_post_types();
+		$public_post_types                          = $this->get_public_custom_post_types();
 		$rareview_scheduled_sticky_posts_post_types = Helpers::get_rareview_scheduled_sticky_posts_post_types();
-		$cache_length        = Helpers::get_rareview_scheduled_sticky_posts_cache_length();
+		$cache_length                               = Helpers::get_rareview_scheduled_sticky_posts_cache_length();
 		?>
 		<form method="post" action="options.php">
 			<?php

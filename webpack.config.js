@@ -6,6 +6,7 @@ module.exports = {
 	entry: {
 		editor: './assets/js/editor.js',
 		'admin-settings': './assets/js/admin-settings.js',
+		'quick-edit': './assets/js/quick-edit.js',
 	},
 	output: {
 		...defaultConfig.output,

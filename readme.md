@@ -4,7 +4,7 @@ Rareview Scheduled Sticky Posts is a WordPress plugin that adds sticky post beha
 
 It gives editors a sidebar control in the block editor to mark supported content as sticky, optionally schedule when the sticky state starts, and optionally set when it expires. On the front end, matching posts are moved to the top of eligible archive queries.
 
-[Launch Rareview Scheduled Sticky Posts Playground](https://playground.wordpress.net/?blueprint-url=https://raw.githubusercontent.com/rareview/stickify/main/playground/blueprint.json)
+[Launch Rareview Scheduled Sticky Posts Playground](https://playground.wordpress.net/?blueprint-url=https://raw.githubusercontent.com/rareview/rareview-scheduled-sticky-posts/main/playground/blueprint.json)
 
 ## How It Works
 
