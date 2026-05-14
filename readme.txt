@@ -40,8 +40,16 @@ Features include:
 
 This plugin uses modern build tooling for development.
 
-Source code is publicly available at:
+The uncompiled source code for all generated JavaScript and CSS assets is publicly available at:
+
 https://github.com/rareview/rareview-scheduled-sticky-posts
+
+Production assets in the `dist` directory are generated from the source files in the repository.
+
+Build steps:
+
+1. Run `npm install`
+2. Run `npm run build`
 
 == Frequently Asked Questions ==
 
