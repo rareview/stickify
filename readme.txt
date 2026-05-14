@@ -36,6 +36,13 @@ Features include:
 5. Save your changes.
 6. Edit a supported post in the block editor and use the Scheduled Sticky Posts panel to enable sticky behavior.
 
+== Development ==
+
+This plugin uses modern build tooling for development.
+
+Source code is publicly available at:
+https://github.com/rareview/rareview-scheduled-sticky-posts
+
 == Frequently Asked Questions ==
 
 = Which post types can use Rareview Scheduled Sticky Posts? =
