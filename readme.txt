@@ -51,6 +51,12 @@ Build steps:
 1. Run `npm install`
 2. Run `npm run build`
 
+== Screenshots ==
+
+1. Rareview Scheduled Sticky Posts admin settings displaying post type selection and current sticky posts.
+2. Single post editing view showing the sticky toggle and schedule.
+3. Admin post table view showing quick hints of what is sticky or scheduled.
+
 == Frequently Asked Questions ==
 
 = Which post types can use Rareview Scheduled Sticky Posts? =
