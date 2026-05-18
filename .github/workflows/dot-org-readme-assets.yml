@@ -1,37 +1,35 @@
 name: Plugin asset/readme update
+
 on:
-  push:
-    tags:
-    - readme
-    - assets
+  pull_request:
+    types:
+      - labeled
+
 jobs:
   main:
-    name: Tagged push from main
+    name: Asset/Readme update
+    # This checks if the label that triggered the workflow is either 'readme' OR 'assets'
+    if: contains(fromJSON('["readme", "assets"]'), github.event.label.name)
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-    - name: Ensure tag commit is on main
-      id: guard
-      shell: bash
-      run: |
-        # Fetch the main branch so its history is fully available
-        git fetch origin main
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
 
-        # Get the actual commit hash of the tag that triggered the run
-        TAG_COMMIT=$(git rev-parse "$GITHUB_SHA")
+      - name: Ensure PR target is main
+        id: guard
+        shell: bash
+        run: |
+          if [ "${{ github.event.pull_request.base.ref }}" = "main" ]; then
+            echo "run_update=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run_update=false" >> "$GITHUB_OUTPUT"
+            echo "PR target is not main. Skipping asset/readme update."
+          fi
 
-        # Check if that commit is part of the main branch history
-        if git branch -r --contains "$TAG_COMMIT" | grep -q "origin/main"; then
-          echo "run_update=true" >> "$GITHUB_OUTPUT"
-        else
-          echo "run_update=false" >> "$GITHUB_OUTPUT"
-          echo "Tag commit is not on main. Skipping asset/readme update."
-        fi
-    - name: WordPress.org plugin asset/readme update
-      if: steps.guard.outputs.run_update == 'true'
-      uses: 10up/action-wordpress-plugin-asset-update@stable
-      env:
-        SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
-        SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+      - name: WordPress.org plugin asset/readme update
+        if: steps.guard.outputs.run_update == 'true'
+        uses: 10up/action-wordpress-plugin-asset-update@stable
+        env:
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
