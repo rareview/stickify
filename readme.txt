@@ -1,6 +1,6 @@
 === Rareview Scheduled Sticky Posts ===
 
-Contributors: rareview, maxinacube, pratik260297
+Contributors: rareview, maxinacube, pratikbarvaliya
 Tags: sticky posts, custom post types, gutenberg, query loop, editorial workflow
 Requires at least: 6.0
 Tested up to: 6.9
