@@ -16,11 +16,14 @@ jobs:
       id: guard
       shell: bash
       run: |
-        git fetch --no-tags origin main
+        # Fetch the main branch so its history is fully available
+        git fetch origin main
 
-        TAG_COMMIT="$(git rev-list -n 1 "$GITHUB_REF")"
+        # Get the actual commit hash of the tag that triggered the run
+        TAG_COMMIT=$(git rev-parse "$GITHUB_SHA")
 
-        if git merge-base --is-ancestor "$TAG_COMMIT" origin/main; then
+        # Check if that commit is part of the main branch history
+        if git branch -r --contains "$TAG_COMMIT" | grep -q "origin/main"; then
           echo "run_update=true" >> "$GITHUB_OUTPUT"
         else
           echo "run_update=false" >> "$GITHUB_OUTPUT"
